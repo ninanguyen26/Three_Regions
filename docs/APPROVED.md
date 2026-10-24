@@ -39,7 +39,8 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 
 - One week = one cycle: **weekend forecast + menu planning → Saturday grocery shopping → Sunday prep → Mon–Fri service → Friday close.**
 - The forecast is **group-level only**, and each week it **picks 2 of season / weather / event**, written as short text notes with the implication spelled out — e.g. weather: "rainy and cold this week — most people will want soup and broth"; event: "first week of school — the place will be crowded with USF college kids." The player plans the week's **menu** from those two notes.
-- **Calendar (Ngoc, 2026-10-23):** the in-fiction year starts in **early January** — Week 1 is the first week of January. The full pick-2 forecast runs from **Week 3** (Week 2 is a single gentle weather note); Tết + Gasparilla land around weeks 5–7 as the first festival test.
+- **Calendar (Ngoc, 2026-10-23):** the in-fiction year starts in **early January** — Week 1 is the first week of January. Tết + Gasparilla land around weeks 5–7 as the first festival test.
+- **Placement (Ngoc, 2026-10-24):** the pick-2 forecast is a **post-game system**. It switches on when the player owns the restaurant (all 28 dishes learned, buyout done), because that is when menu planning becomes the player's job; with the full roster and menu responsibility, the notes drive real choices (what to feature, how much to prep, Friday's sold-vs-waste). Before the buyout there is **no player-facing forecast**: Week 1 has none, and Week 2's single gentle weather note is the *owner's*, shown as teaching while she still plans the menu. The apprentice cooks and learns; the owners plan.
 - **Forecast generation (Ngoc approved Muse's proposal, 2026-10-23):** forecasts are **assembled, not pre-authored** — the game is infinite, so notes are composed from fragments (condition × phrasing variant × implication clause, tagged by craving and crowd). Anchor events are pinned to calendar dates and return yearly (tradition, not repetition). Weather is drawn from **Tampa climate tables** weighted by month and is **sticky** (a pattern holds 1–3 weeks, wearing a fresh phrasing each week). Every fragment pool draws as a **bag** — no replacement until the pool empties — plus a **~10-week cooldown** per fragment, so a note can't resurface for most of a game-year. No runtime AI text generation.
 - Friday close is scored twice: how well you cooked, and how well you planned (sold vs waste). Earnings tick into the buyout savings.
 
@@ -48,7 +49,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 - **Weeks 1–2 are tutorial mode; the official game starts Week 3.** The calendar (seasons, Tết countdown) ticks from day 1; only the rules change.
 - The restaurant does not start empty — only the player does: **house dishes** (the restaurant's existing menu, visible but grey, "not yours yet") vs **player stamps** (earned at 80%+; zero at start).
 - **Week 1 — Apprentice:** the owner drives; the 4 starter dishes are taught; guided shopping and prep; exact orders by name; forecast/spoilage/quests/cravings OFF; **cannot fail** (under 80% → she rescues the dish, it becomes the staff meal, same-day retry with the biggest-miss hint).
-- **Week 2 — Assisted:** simple weather-only forecast; she proposes the menu (player may override); prices on, waste forgiven; **texting opens** (the sister's first thread); first quest.
+- **Week 2 — Assisted:** simple weather-only forecast (the owner's note, teaching; the player-facing forecast is post-game only, see Placement above); she proposes the menu (player may override); prices on, waste forgiven; **texting opens** (the sister's first thread); first quest.
 - **Week 3 — graduation:** she hands over the menu book and market list and takes Sunday off. Full loop ON.
 
 ## Progression
@@ -118,3 +119,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 - A deceased-husband backstory (he is alive and working).
 - Domestic-interior photos; people-as-subjects photos; fictional story props.
 - OUT of the roster: chè ba màu, bún thang, cơm hến.
+
+## Content rules
+- **No em-dashes anywhere in the game's database** (Ngoc, 2026-10-23): every authored data text (forecast fragments, dish clues, histories, ingredient text) is written without the "—" character; commas, colons, and full sentences do the joining instead. Scrubbed to zero the night the rule was set: the forecast fragments, the phở clue and history, the schema, and every screen's UI copy and code comments. Note: forecast notes persist as text in the save, so a note generated before a text fix keeps its old wording on screen until the next week generates fresh notes.
+- **Midweek top-up shopping** (Ngoc's proposal, 2026-10-23, shape agreed in discussion): service days cook from Saturday's basket; if something is missing or wrong, the player can buy it midweek at **150%** of the Saturday price. Top-up only (no full re-shop), applies from the purchase day forward, never rewrites days already served. Needs ingredient prices to exist; a simple per-ingredient price list comes first when this is built.

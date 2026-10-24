@@ -1,4 +1,4 @@
-// Three Regions — core data schema.
+// Three Regions: core data schema.
 // Content model per dish: clue, target slots (correct ingredient + tier),
 // per-slot substitutes with similarity scores, verb, history, fun fact.
 
@@ -13,13 +13,14 @@ export type Verb =
   | "pour"
   | "wrap"
   | "simmer"
-  | "whisk"; // cà phê trứng only — runs on the toss engine
+  | "whisk"; // cà phê trứng only; runs on the toss engine
 
 export type Tier = "signature" | "core" | "support" | "garnish";
 
 export type IngredientCategory =
   | "protein"
   | "noodle"
+  | "bread"
   | "aromatic"
   | "seasoning"
   | "produce"
@@ -34,7 +35,7 @@ export interface IngredientDef {
 
 export interface Substitute {
   ingredientId: string;
-  /** 0..1 — how close this pick is to the slot's correct ingredient. */
+  /** 0..1: how close this pick is to the slot's correct ingredient. */
   similarity: number;
 }
 
@@ -55,6 +56,8 @@ export interface Dish {
   secondaryVerb?: Verb;
   /** The market clue/description that leads the player to this dish's ingredients. */
   clue: string;
+  /** Sunday prep flavor line for this dish (what the kitchen does to get it ready). */
+  prepNote: string;
   slots: DishSlot[];
   history: string;
   funFact: string;

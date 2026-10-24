@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { DISH_BY_ID } from "./src/data/dishes";
+import { DISH_BY_ID, STARTER_IDS } from "./src/data/dishes";
 import { colors } from "./src/theme";
 import {
   generateForecast,
@@ -44,7 +44,6 @@ export default function App() {
   const [save, setSave] = useState<SaveState | null>(null);
   const [screen, setScreen] = useState<Screen>("loading");
   const [execution, setExecution] = useState(0);
-  const dish = DISH_BY_ID["pho-bo"];
 
   const beginWeek = (week: number, prev: SaveState | null): SaveState => {
     const base = prev ?? freshSave();
@@ -58,6 +57,7 @@ export default function App() {
       phase: "weekend",
       notes,
       forecastState,
+      menuIds: [...STARTER_IDS],
       basket: null,
       results: [],
     };
@@ -101,6 +101,10 @@ export default function App() {
   }
 
   const dayIndex = save.results.length;
+  const menu = save.menuIds.flatMap((id) =>
+    DISH_BY_ID[id] ? [DISH_BY_ID[id]] : [],
+  );
+  const dish = menu[dayIndex % menu.length] ?? DISH_BY_ID["pho-bo"];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -116,7 +120,7 @@ export default function App() {
       )}
       {screen === "market" && (
         <MarketScreen
-          dish={dish}
+          dishes={menu}
           onBack={() => apply({ ...save, phase: "weekend" }, "weekend")}
           onDone={(basket) =>
             apply({ ...save, basket, phase: "prep" }, "prep")
@@ -125,6 +129,7 @@ export default function App() {
       )}
       {screen === "prep" && (
         <PrepScreen
+          dishes={menu}
           basket={save.basket ?? []}
           onStart={() => apply({ ...save, phase: "service" }, "day")}
         />
@@ -133,6 +138,7 @@ export default function App() {
         <DayScreen
           week={save.week}
           day={DAYS[dayIndex]}
+          dish={dish}
           results={save.results}
           onCook={() => setScreen("cook")}
         />
@@ -150,13 +156,14 @@ export default function App() {
       {screen === "result" && (
         <ResultScreen
           dish={dish}
+          menu={menu}
           basket={save.basket ?? []}
           execution={execution}
           retryLabel={
             dayIndex >= 4 ? "Friday close →" : "Next day →"
           }
           onRetry={() => {
-            const r = scoreDish(dish, save.basket ?? [], execution);
+            const r = scoreDish(dish, save.basket ?? [], execution, menu);
             const result: DayResult = {
               day: DAYS[dayIndex],
               percent: r.percent,

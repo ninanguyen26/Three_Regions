@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Dish, IngredientCategory } from "../data/types";
 import { INGREDIENTS } from "../data/ingredients";
-import { WRONG_PICK_PENALTY } from "../game/scorer";
 import { colors } from "../theme";
 
 const CATEGORY_ORDER: IngredientCategory[] = [
   "protein",
   "noodle",
+  "bread",
   "seasoning",
   "aromatic",
   "produce",
@@ -18,6 +18,7 @@ const CATEGORY_ORDER: IngredientCategory[] = [
 const CATEGORY_LABEL: Record<IngredientCategory, string> = {
   protein: "Protein",
   noodle: "Noodles",
+  bread: "Bread",
   seasoning: "Seasonings",
   aromatic: "Aromatics",
   produce: "Produce",
@@ -26,17 +27,20 @@ const CATEGORY_LABEL: Record<IngredientCategory, string> = {
 };
 
 export default function MarketScreen({
-  dish,
+  dishes,
   onDone,
   onBack,
 }: {
-  dish: Dish;
+  dishes: Dish[];
   onDone: (basket: string[]) => void;
   onBack: () => void;
 }) {
-  // Free picking (Ngoc): anything on the shelf, up to the dish's cap.
-  // The scorer takes each slot's best match; the rest get dinged.
-  const cap = dish.slots.length;
+  // Free picking (Ngoc): anything on the shelf, up to the menu's cap (the
+  // slots of every dish on the menu, added together). One basket serves
+  // the whole menu; the scorer takes each slot's best match, and picks no
+  // dish on the menu uses get dinged.
+  const allSlots = dishes.flatMap((d) => d.slots);
+  const cap = allSlots.length;
   const [basket, setBasket] = useState<string[]>([]);
   const full = basket.length >= cap;
 
@@ -52,8 +56,8 @@ export default function MarketScreen({
   const covered = (slot: Dish["slots"][number]) =>
     basket.includes(slot.ingredientId) ||
     slot.substitutes.some((s) => basket.includes(s.ingredientId));
-  const uncoveredCount = dish.slots.filter((s) => !covered(s)).length;
-  const uncoveredSignature = dish.slots.some(
+  const uncoveredCount = allSlots.filter((s) => !covered(s)).length;
+  const uncoveredSignature = allSlots.some(
     (s) => s.tier === "signature" && !covered(s),
   );
 
@@ -64,12 +68,12 @@ export default function MarketScreen({
       </Pressable>
       <Text style={styles.title}>The Market</Text>
       <View style={styles.clueCard}>
-        <Text style={styles.clueLabel}>You're cooking {dish.name}</Text>
-        <Text style={styles.clue}>{dish.clue}</Text>
+        <Text style={styles.clueLabel}>This week's menu</Text>
+        <Text style={styles.clue}>{dishes.map((d) => d.name).join(" · ")}</Text>
         <Text style={styles.clueHint}>
-          Pick anything you like, up to {cap} ingredients. Whatever the dish
-          doesn't end up using dings your score — {WRONG_PICK_PENALTY} points
-          each.
+          One basket covers the whole menu. Pick anything you like, up to{" "}
+          {cap} ingredients. Every dish this week is cooked and judged from
+          this basket.
         </Text>
       </View>
 
@@ -78,7 +82,7 @@ export default function MarketScreen({
       </Text>
       <View style={styles.basket}>
         {basket.length === 0 ? (
-          <Text style={styles.basketEmpty}>Nothing yet — tap the shelf.</Text>
+          <Text style={styles.basketEmpty}>Nothing yet. Tap the shelf.</Text>
         ) : (
           basket.map((id) => (
             <Pressable key={id} style={styles.basketChip} onPress={() => toggle(id)}>
@@ -91,7 +95,7 @@ export default function MarketScreen({
       </View>
       {full ? (
         <Text style={styles.fullHint}>
-          Basket's full — tap a basket item to put it back before adding
+          Basket's full. Tap a basket item to put it back before adding
           another.
         </Text>
       ) : null}
@@ -123,18 +127,18 @@ export default function MarketScreen({
       {uncoveredSignature ? (
         <Text style={styles.warn}>
           {full
-            ? "A doubled-up pick is crowding out a signature ingredient — that caps the dish at 79."
-            : "One of the signature slots still has nothing at all — that caps the dish below the stamp, no matter what else you picked."}
+            ? "A doubled-up pick is crowding out a signature ingredient. That caps its dish at 79."
+            : "A signature slot on the menu still has nothing at all. That caps its dish below the stamp, no matter what else you picked."}
         </Text>
       ) : uncoveredCount > 0 ? (
         <Text style={styles.warn}>
           {full
             ? uncoveredCount === 1
-              ? `One pick is doubling up — dinged −${WRONG_PICK_PENALTY}, and the slot it crowds out scores zero.`
-              : `${uncoveredCount} picks are doubling up — each dinged −${WRONG_PICK_PENALTY}, and the slots they crowd out score zero.`
+              ? "One pick is doubling up, and the slot it crowds out scores zero."
+              : `${uncoveredCount} picks are doubling up, and the slots they crowd out score zero.`
             : uncoveredCount === 1
-              ? "1 of the dish's slots has nothing yet — empty slots score zero."
-              : `${uncoveredCount} of the dish's slots have nothing yet — empty slots score zero.`}
+              ? "1 of the menu's slots has nothing yet. Empty slots score zero."
+              : `${uncoveredCount} of the menu's slots have nothing yet. Empty slots score zero.`}
         </Text>
       ) : null}
 

@@ -1,4 +1,4 @@
-// Three Regions — the forecast generator (approved design, 2026-10-23).
+// Three Regions: the forecast generator (approved design, 2026-10-23).
 //
 // Forecasts are assembled from fragments, never pre-authored whole:
 //   note = condition x phrasing x implication, tagged by craving/crowd.
@@ -7,6 +7,11 @@
 // and is sticky for 1-3 weeks (fresh phrasing each week); anchor events
 // are pinned to calendar weeks and return every year. The full pick-2
 // system runs from Week 3; Week 2 gets one gentle weather note.
+
+/** Parked 2026-10-24 (Ngoc): the forecast design is being reworked,
+ * so the hub hides the forecast card. The generator stays in place;
+ * flip this to bring the card back. */
+export const FORECAST_PARKED = true;
 
 export type NoteKind = "weather" | "event" | "season";
 
@@ -43,12 +48,12 @@ const WEATHER: WeatherCondition[] = [
     id: "cool-breezy",
     months: [2, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 2],
     phrases: [
-      "Cool and breezy all week — jacket weather, finally.",
+      "Cool and breezy all week. Jacket weather, finally.",
       "Dry, cool air this week, the kind Tampa waits all year for.",
       "Crisp mornings, easy afternoons this week.",
     ],
     implications: [
-      "Good grilling weather — people will want something with char on it.",
+      "Good grilling weather. People will want something with char on it.",
       "Hearty plates will travel well this week.",
       "People eat like they mean it in weather like this.",
     ],
@@ -57,13 +62,13 @@ const WEATHER: WeatherCondition[] = [
     id: "mild-perfect",
     months: [2, 2, 3, 3, 1, 0, 0, 0, 0, 1, 3, 2],
     phrases: [
-      "Perfect weather this week — low seventies, blue skies.",
-      "One of those weeks Tampa brags about — mild and bright.",
+      "Perfect weather this week: low seventies, blue skies.",
+      "One of those weeks Tampa brags about: mild and bright.",
       "Windows-open weather all week long.",
     ],
     implications: [
       "Light, fresh dishes will sound good to everybody.",
-      "People will linger — nobody's rushing home in this.",
+      "People will linger. Nobody's rushing home in this.",
       "Herby, fresh flavors are the week's mood.",
     ],
   },
@@ -71,12 +76,12 @@ const WEATHER: WeatherCondition[] = [
     id: "warm-humid",
     months: [0, 0, 1, 2, 3, 3, 3, 3, 3, 2, 1, 0],
     phrases: [
-      "Warm and humid this week — the air feels like soup already.",
+      "Warm and humid this week. The air feels like soup already.",
       "The humidity's back this week, heavy by noon.",
       "Sticky, swampy weather settling in this week.",
     ],
     implications: [
-      "Cold and fresh will win — nobody wants a heavy bowl in this.",
+      "Cold and fresh will win. Nobody wants a heavy bowl in this.",
       "People will reach for crisp, cool, herby things.",
       "Light dishes and cold drinks, that's the week.",
     ],
@@ -90,7 +95,7 @@ const WEATHER: WeatherCondition[] = [
       "Grey skies and wet streets all week.",
     ],
     implications: [
-      "Soup weather, plain and simple — broth is what they'll want.",
+      "Soup weather, plain and simple: broth is what they'll want.",
       "Wet people want warm bowls; count on it.",
       "Comfort food carries a rainy week.",
     ],
@@ -104,21 +109,21 @@ const WEATHER: WeatherCondition[] = [
       "Mornings fine, afternoons electric this week.",
     ],
     implications: [
-      "People will come in early to beat the storms — and want broth when they do.",
+      "People will come in early to beat the storms, and they'll want broth when they do.",
       "Lunch will be the rush; dinner depends on the sky.",
-      "Hot bowls before the thunder — that's the pattern.",
+      "Hot bowls before the thunder. That's the pattern.",
     ],
   },
   {
     id: "heat-wave",
     months: [0, 0, 0, 0, 1, 2, 3, 3, 2, 1, 0, 0],
     phrases: [
-      "A heat wave this week — triple digits if the breeze quits.",
+      "A heat wave this week: triple digits if the breeze quits.",
       "Dangerous hot this week, even for Tampa.",
       "The kind of heat that empties the sidewalks by two.",
     ],
     implications: [
-      "Cold, fresh, and light — anything heavy will sit.",
+      "Cold, fresh, and light. Anything heavy will sit.",
       "Iced and crisp beats hot and heavy this week.",
       "People will eat like birds and drink like fish.",
     ],
@@ -127,12 +132,12 @@ const WEATHER: WeatherCondition[] = [
     id: "dry-stretch",
     months: [1, 1, 1, 1, 0, 0, 0, 0, 0, 2, 3, 1],
     phrases: [
-      "A long dry stretch this week — not a cloud worth naming.",
+      "A long dry stretch this week, not a cloud worth naming.",
       "Dry and dusty this week; the rain barrels are empty.",
       "No rain in sight this week, just sun.",
     ],
     implications: [
-      "Grilled smoke smells like dinner in dry weather — lean into it.",
+      "Grilled smoke smells like dinner in dry weather. Lean into it.",
       "Outdoor appetites: char and crunch will move.",
       "People will be out and hungry in the evenings.",
     ],
@@ -142,11 +147,11 @@ const WEATHER: WeatherCondition[] = [
     months: [0, 0, 0, 0, 0, 1, 1, 2, 2, 1, 0, 0],
     phrases: [
       "There's a storm brewing out in the Gulf this week.",
-      "The weather radio won't shut up this week — something's forming offshore.",
+      "The weather radio won't shut up this week. Something's forming offshore.",
       "A named storm is wandering the Gulf this week.",
     ],
     implications: [
-      "People stock up and eat early in case it turns — then it gets quiet.",
+      "People stock up and eat early in case it turns. Then it gets quiet.",
       "Big, keeping dishes are what a nervous week wants.",
       "Expect a rush before it lands and a ghost town if it does.",
     ],
@@ -157,7 +162,7 @@ const WEATHER_BY_ID: Record<string, WeatherCondition> = Object.fromEntries(
   WEATHER.map((w) => [w.id, w]),
 );
 
-/** Week-2's gentle subset — nothing scary in the tutorial. */
+/** Week-2's gentle subset: nothing scary in the tutorial. */
 const GENTLE_IDS = ["cold-snap", "cool-breezy", "mild-perfect"];
 
 interface Anchor {
@@ -172,67 +177,67 @@ const ANCHORS: Anchor[] = [
     week: 5,
     id: "gasparilla",
     kind: "event",
-    text: "Gasparilla weekend — pirate flotilla, parades, half of Tampa downtown in costume. Expect tourists and big, hungry crowds.",
+    text: "Gasparilla weekend: pirate flotilla, parades, half of Tampa downtown in costume. Expect tourists and big, hungry crowds.",
   },
   {
     week: 6,
     id: "state-fair",
     kind: "event",
-    text: "The Florida State Fair is on across town — families everywhere, and fair food competing for their appetites.",
+    text: "The Florida State Fair is on across town. Families everywhere, and fair food competing for their appetites.",
   },
   {
     week: 7,
     id: "tet",
     kind: "event",
-    text: "Tết week — Tampa's Vietnamese families are celebrating the new year. Homesick hearts and big family orders; this is your community's week.",
+    text: "Tết week. Tampa's Vietnamese families are celebrating the new year. Homesick hearts and big family orders; this is your community's week.",
   },
   {
     week: 9,
     id: "spring-training",
     kind: "event",
-    text: "Spring training is on — baseball fans wintering in the sun, eating out after day games.",
+    text: "Spring training is on. Baseball fans wintering in the sun, eating out after day games.",
   },
   {
     week: 11,
     id: "spring-break",
     kind: "event",
-    text: "Spring break — college kids and beach traffic all week.",
+    text: "Spring break: college kids and beach traffic all week.",
   },
   {
     week: 13,
     id: "snowbirds-leave",
     kind: "season",
-    text: "The snowbirds are heading home — the dining room's about to get quieter for a while.",
+    text: "The snowbirds are heading home. The dining room's about to get quieter for a while.",
   },
   {
     week: 19,
     id: "riverfest",
     kind: "event",
-    text: "Riverfest downtown — the riverwalk will be packed all weekend.",
+    text: "Riverfest downtown. The riverwalk will be packed all weekend.",
   },
   {
     week: 21,
     id: "rainy-season-start",
     kind: "season",
-    text: "The rainy season is settling in — afternoon storms are about to become a daily thing.",
+    text: "The rainy season is settling in. Afternoon storms are about to become a daily thing.",
   },
   {
     week: 34,
     id: "usf-first-week",
     kind: "event",
-    text: "First week of school — the place will be crowded with USF college kids.",
+    text: "First week of school. The place will be crowded with USF college kids.",
   },
   {
     week: 44,
     id: "snowbirds-return",
     kind: "season",
-    text: "The snowbirds are back — northern plates on every car, early dinners, a full dining room by six.",
+    text: "The snowbirds are back: northern plates on every car, early dinners, a full dining room by six.",
   },
   {
     week: 47,
     id: "thanksgiving",
     kind: "event",
-    text: "Thanksgiving week — families in town, group dinners, and a quiet Friday while everyone recovers.",
+    text: "Thanksgiving week. Families in town, group dinners, and a quiet Friday while everyone recovers.",
   },
 ];
 
@@ -246,46 +251,46 @@ interface GenericEvent {
 const GENERIC_EVENTS: GenericEvent[] = [
   {
     id: "food-festival",
-    text: "There's a food festival downtown this weekend — curious eaters will be out hunting for something new.",
+    text: "There's a food festival downtown this weekend. Curious eaters will be out hunting for something new.",
   },
   {
     id: "convention",
-    text: "A big convention's in town — hotel crowds looking for dinner near the riverwalk.",
+    text: "A big convention's in town. Hotel crowds looking for dinner near the riverwalk.",
   },
   {
     id: "marathon",
-    text: "Marathon Sunday — runners and their families, hungry early.",
+    text: "Marathon Sunday. Runners and their families, hungry early.",
   },
   {
     id: "beach-weekend",
-    text: "A perfect beach weekend coming — half the city heads for the coast, and the other half eats out.",
+    text: "A perfect beach weekend coming. Half the city heads for the coast, and the other half eats out.",
   },
   {
     id: "farmers-market",
-    text: "The farmers market's expanding this weekend — fresh everything, and people in a cooking mood.",
+    text: "The farmers market's expanding this weekend. Fresh everything, and people in a cooking mood.",
   },
   {
     id: "bucs-game",
-    text: "Bucs home game Sunday — jerseys everywhere, groups eating before and after.",
+    text: "Bucs home game Sunday. Jerseys everywhere, groups eating before and after.",
     weeks: (w) => w >= 36 || w <= 4,
   },
   {
     id: "lightning-run",
-    text: "The Lightning are on a run — game nights are busy nights downtown.",
+    text: "The Lightning are on a run. Game nights are busy nights downtown.",
     weeks: (w) => w >= 40 || w <= 24,
   },
   {
     id: "art-walk",
-    text: "Art walk in Ybor this weekend — a younger, wandering crowd.",
+    text: "Art walk in Ybor this weekend. A younger, wandering crowd.",
   },
   {
     id: "wedding-season",
-    text: "Wedding season — rehearsal dinners and out-of-town guests all week.",
+    text: "Wedding season. Rehearsal dinners and out-of-town guests all week.",
     weeks: (w) => (w >= 9 && w <= 20) || (w >= 40 && w <= 47),
   },
   {
     id: "fishing-tournament",
-    text: "A fishing tournament's in the bay — early risers, and seafood on everyone's mind.",
+    text: "A fishing tournament's in the bay. Early risers, and seafood on everyone's mind.",
   },
 ];
 
@@ -335,7 +340,7 @@ function composeWeatherNote(
 ): ForecastNote {
   const cond = WEATHER_BY_ID[conditionId];
   const history = state.lastCombos[conditionId] ?? [];
-  // Pick a phrase+implication combo this condition hasn't worn recently —
+  // Pick a phrase+implication combo this condition hasn't worn recently.
   // a sticky pattern can hold for 3 weeks without ever repeating its text.
   let pIdx = 0;
   let iIdx = 0;
@@ -389,7 +394,7 @@ function drawWeatherCondition(
     const id = state.weatherDeck.pop()!;
     if (id === excludeId) continue; // never the same condition twice in a week
     const cond = WEATHER_BY_ID[id];
-    if (cond.months[month - 1] === 0) continue; // out of season — discard
+    if (cond.months[month - 1] === 0) continue; // out of season, discard
     const last = state.lastConditionWeek[id];
     if (last != null && absWeek - last < CONDITION_COOLDOWN) continue; // cooling down
     // New pattern: it may stick around for 1-2 more weeks.
@@ -464,7 +469,7 @@ export function generateForecast(
     if (condId) notes.push(composeWeatherNote(state, condId, absWeek, rng));
   }
   if (notes.length < 2) {
-    // Fallback: whatever's left — another event, or a second weather draw
+    // Fallback: whatever's left. Another event, or a second weather draw
     // (never the same condition twice in one week).
     const ev = anchor ? null : drawGenericEvent(state, absWeek, weekOfYear, rng);
     if (ev) notes.push(ev);

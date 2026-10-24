@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Dish } from "../data/types";
 import { colors } from "../theme";
+import { VERB_COPY } from "./verbCopy";
 
-// The slice's placeholder Pour: hold to fill the bowl; release inside the
-// band for a clean pour. Where you stop becomes the scorer's execution
-// input (0..1). The real Pour game replaces this screen's innards, not its
-// contract: it still hands (picks, execution) to the result.
+// The placeholder cooking step: hold to fill; release inside the band for
+// a clean execution. Where you stop becomes the scorer's execution input
+// (0..1). The same interaction wears every dish's verb (pour, wrap, chop,
+// sear...) until the real verb games replace this screen's innards, not
+// its contract: it still hands (execution) to the result.
 const BAND_MIN = 78;
 const BAND_MAX = 92;
 const FILL_MS = 2200;
@@ -71,15 +73,17 @@ export default function CookScreen({
   };
 
   const fillPct = Math.round(fill);
+  const copy = VERB_COPY[dish.verb];
+  const holdLower = copy.hold.charAt(0).toLowerCase() + copy.hold.slice(1);
 
   return (
     <View style={styles.root}>
       <Pressable onPress={onBack} hitSlop={10} style={styles.backWrap}>
-        <Text style={styles.back}>← Market</Text>
+        <Text style={styles.back}>← Back</Text>
       </Pressable>
-      <Text style={styles.title}>Pour the broth</Text>
+      <Text style={styles.title}>{copy.title}</Text>
       <Text style={styles.sub}>
-        {dish.name} · hold to pour, let go inside the golden band
+        {dish.name} · {holdLower}, let go inside the golden band
       </Text>
 
       <View style={styles.gaugeWrap}>
@@ -104,20 +108,20 @@ export default function CookScreen({
           onPressIn={() => setHolding(true)}
           onPressOut={() => finish(fillRef.current)}
         >
-          <Text style={styles.holdText}>{holding ? "Pouring..." : "Hold to pour"}</Text>
+          <Text style={styles.holdText}>{holding ? copy.holding : copy.hold}</Text>
         </Pressable>
       ) : (
         <View style={styles.doneBox}>
           <Text style={styles.doneText}>
             {finished === 1
-              ? `Clean pour — stopped at ${fillPct}%, right in the band.`
-              : `Stopped at ${fillPct}% — execution ${Math.round(finished * 100)}%.`}
+              ? `${copy.clean} Stopped at ${fillPct}%, right in the band.`
+              : `Stopped at ${fillPct}%. Execution ${Math.round(finished * 100)}%.`}
           </Text>
           <Pressable style={styles.cta} onPress={() => onServe(finished)}>
             <Text style={styles.ctaText}>Serve it →</Text>
           </Pressable>
           <Pressable onPress={reset} hitSlop={8}>
-            <Text style={styles.again}>Pour again</Text>
+            <Text style={styles.again}>{copy.again}</Text>
           </Pressable>
         </View>
       )}

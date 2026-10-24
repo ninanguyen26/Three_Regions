@@ -2,8 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Medal } from "./scorer";
 import type { ForecastNote, ForecastState } from "./forecast";
 import { initialForecastState } from "./forecast";
+import { DISH_BY_ID, STARTER_IDS } from "../data/dishes";
 
-// Three Regions — the save. One JSON blob in AsyncStorage: the week loop's
+// Three Regions: the save. One JSON blob in AsyncStorage: the week loop's
 // whole state (week, phase, basket, results, savings, forecast machinery),
 // so closing the app mid-week resumes where you left off.
 
@@ -16,7 +17,7 @@ export interface DayResult {
   earned: number;
 }
 
-/** Placeholder prices — the real economy numbers are still undecided. */
+/** Placeholder prices. The real economy numbers are still undecided. */
 export const EARNINGS: Record<Medal, number> = {
   gold: 20,
   silver: 16,
@@ -34,7 +35,9 @@ export interface SaveState {
   /** This week's forecast notes (Weeks 1: none, 2: one gentle note). */
   notes: ForecastNote[];
   forecastState: ForecastState;
-  /** Saturday's basket — the week's phở is cooked from it all week. */
+  /** This week's menu (dish ids). Saturday's basket serves all of it. */
+  menuIds: string[];
+  /** Saturday's basket. The week's menu is cooked from it all week. */
   basket: string[] | null;
   results: DayResult[];
 }
@@ -49,6 +52,7 @@ export function freshSave(): SaveState {
     totalStamps: 0,
     notes: [],
     forecastState: initialForecastState(),
+    menuIds: [...STARTER_IDS],
     basket: null,
     results: [],
   };
@@ -57,7 +61,15 @@ export function freshSave(): SaveState {
 export async function loadSave(): Promise<SaveState | null> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as SaveState) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SaveState;
+    // Saves from before menus existed have no menuIds: their week runs the
+    // full starter menu rather than failing to load.
+    const known = Array.isArray(parsed.menuIds)
+      ? parsed.menuIds.filter((id) => DISH_BY_ID[id])
+      : [];
+    parsed.menuIds = known.length > 0 ? known : [...STARTER_IDS];
+    return parsed;
   } catch {
     return null;
   }
@@ -67,6 +79,6 @@ export async function storeSave(save: SaveState): Promise<void> {
   try {
     await AsyncStorage.setItem(KEY, JSON.stringify(save));
   } catch {
-    // Storage full/blocked — the in-memory game continues regardless.
+    // Storage full/blocked. The in-memory game continues regardless.
   }
 }

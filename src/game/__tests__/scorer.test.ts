@@ -11,7 +11,7 @@ const swap = (basket: string[], outId: string, inId: string) =>
 const drop = (basket: string[], outId: string) =>
   basket.filter((id) => id !== outId);
 
-describe("phở bò — paper cases", () => {
+describe("phở bò: paper cases", () => {
   test("exact recipe scores 100 and gold", () => {
     const r = scoreDish(pho, EXACT);
     expect(r.percent).toBe(100);
@@ -38,7 +38,7 @@ describe("phở bò — paper cases", () => {
   test("wrong-family signature pick (chicken in phở bò) drops the score hard", () => {
     const r = scoreDish(pho, swap(EXACT, "beef-brisket", "chicken"));
     // chicken is the beef slot's best (only) family match at 0.4: it scores
-    // the slot, so no cap and no wrong-pick ding — the weight does the damage.
+    // the slot, so no cap and no wrong-pick ding. The weight does the damage.
     expect(r.capped).toBe(false);
     expect(r.wrongPicks).toEqual([]);
     expect(r.percent).toBeLessThan(90);
@@ -71,7 +71,7 @@ describe("phở bò — paper cases", () => {
   });
 });
 
-describe("phở bò — the free basket", () => {
+describe("phở bò: the free basket", () => {
   test("hoarding all three noodles dings the extras and starves other slots", () => {
     // 3 noodles + 7 exact others = a full basket of 10; sprouts and lime
     // never made it in. The flat noodle scores the slot; the other two are
@@ -97,8 +97,8 @@ describe("phở bò — the free basket", () => {
 
   test("a foreign extra (chicken alongside brisket) is dinged, not scored", () => {
     // lime swapped out for chicken: the beef slot already has its exact
-    // pick, so the chicken is used by no slot — dinged -3 on top of the
-    // empty garnish slot.
+    // pick, so the chicken is used by no slot and dinged 6 on top of
+    // the empty garnish slot.
     const r = scoreDish(pho, swap(EXACT, "lime", "chicken"));
     expect(r.wrongPicks).toEqual(["chicken"]);
     expect(r.percent).toBe(90.8);

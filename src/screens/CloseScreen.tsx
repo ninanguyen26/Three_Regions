@@ -10,7 +10,7 @@ const MEDAL_LABEL = {
   fail: "no stamp",
 } as const;
 
-// Friday close: the week's reckoning — stamps, earnings, savings.
+// Friday close: the week's reckoning. Stamps, earnings, savings.
 export default function CloseScreen({
   week,
   results,
@@ -31,7 +31,7 @@ export default function CloseScreen({
 
       {results.map((r) => (
         <Text key={r.day} style={styles.row}>
-          {r.day} — {r.percent}% {MEDAL_LABEL[r.medal]} · +${r.earned}
+          {r.day}: {r.percent}% {MEDAL_LABEL[r.medal]} · +${r.earned}
         </Text>
       ))}
 

@@ -1,13 +1,17 @@
-// Three Regions — the medal scorer. Pure function, no UI, no I/O.
+// Three Regions: the medal scorer. Pure function, no UI, no I/O.
 //
 // The basket model (Ngoc, 2026-10-23): the player picks freely, up to the
 // dish's cap (= its slot count). Each slot scores its BEST-matching pick in
 // the basket (exact 1.0, substitute = its similarity, nothing = 0), weighted
 // by tier (signature 3 / core 2 / support 1 / garnish 0.5). Picks that no
-// slot uses — the family's loser, a foreign ingredient — are WRONG PICKS and
+// slot uses (the family's loser, a foreign ingredient) are WRONG PICKS and
 // each dings the score. A slot left with no family member at all still caps
 // the dish when it's a signature slot. Minus a small execution penalty.
 // Thresholds decided by Ngoc: stamp >= 80, silver >= 90, gold >= 95.
+//
+// Menu play: when the week's basket serves a whole menu, scoreDish takes
+// the menu as a 4th argument and wrong picks are judged against every dish
+// on it (see below), so Tuesday's ingredients are not Monday's mistakes.
 
 import type { Dish, Tier } from "../data/types";
 
@@ -46,10 +50,10 @@ export interface ScoreResult {
   medal: Medal;
   /** True when a signature slot had no pick from its family at all. */
   capped: boolean;
-  /** The slot that cost the most points — drives the feedback line. */
+  /** The slot that cost the most points; drives the feedback line. */
   biggestMiss: SlotResult | null;
   slots: SlotResult[];
-  /** Basket picks no slot used — each one dinged WRONG_PICK_PENALTY. */
+  /** Basket picks no slot used; each one dinged WRONG_PICK_PENALTY. */
   wrongPicks: string[];
   wrongPickPenalty: number;
 }
@@ -61,36 +65,57 @@ export function medalFor(percent: number): Medal {
   return "fail";
 }
 
-export function scoreDish(dish: Dish, basket: string[], execution = 1): ScoreResult {
+export function scoreDish(
+  dish: Dish,
+  basket: string[],
+  execution = 1,
+  menu?: Dish[],
+): ScoreResult {
   const uniqueBasket = [...new Set(basket)];
   const inBasket = new Set(uniqueBasket);
-  const used = new Set<string>();
 
-  const slots: SlotResult[] = dish.slots.map((slot) => {
-    let pickedId: string | null = null;
-    let similarity = 0;
-    if (inBasket.has(slot.ingredientId)) {
-      pickedId = slot.ingredientId;
-      similarity = 1;
-    } else {
-      for (const sub of slot.substitutes) {
-        if (inBasket.has(sub.ingredientId) && sub.similarity > similarity) {
-          pickedId = sub.ingredientId;
-          similarity = sub.similarity;
+  const matchSlots = (d: Dish): { slots: SlotResult[]; used: Set<string> } => {
+    const used = new Set<string>();
+    const slots: SlotResult[] = d.slots.map((slot) => {
+      let pickedId: string | null = null;
+      let similarity = 0;
+      if (inBasket.has(slot.ingredientId)) {
+        pickedId = slot.ingredientId;
+        similarity = 1;
+      } else {
+        for (const sub of slot.substitutes) {
+          if (inBasket.has(sub.ingredientId) && sub.similarity > similarity) {
+            pickedId = sub.ingredientId;
+            similarity = sub.similarity;
+          }
         }
       }
-    }
-    if (pickedId != null) used.add(pickedId);
-    return {
-      ingredientId: slot.ingredientId,
-      tier: slot.tier,
-      pickedId,
-      similarity,
-      weight: TIER_WEIGHTS[slot.tier],
-    };
-  });
+      if (pickedId != null) used.add(pickedId);
+      return {
+        ingredientId: slot.ingredientId,
+        tier: slot.tier,
+        pickedId,
+        similarity,
+        weight: TIER_WEIGHTS[slot.tier],
+      };
+    });
+    return { slots, used };
+  };
 
-  const wrongPicks = uniqueBasket.filter((id) => !used.has(id));
+  const { slots, used } = matchSlots(dish);
+
+  // Wrong picks are judged against the whole menu when one is given: a
+  // pick another menu dish uses is not a mistake, even on a day it is not
+  // served. A pick no slot on the menu ends up using still dings.
+  const menuUsed = new Set<string>(used);
+  if (menu) {
+    for (const d of menu) {
+      if (d.id === dish.id) continue;
+      for (const id of matchSlots(d).used) menuUsed.add(id);
+    }
+  }
+
+  const wrongPicks = uniqueBasket.filter((id) => !menuUsed.has(id));
   const wrongPickPenalty = wrongPicks.length * WRONG_PICK_PENALTY;
 
   const totalWeight = slots.reduce((a, s) => a + s.weight, 0);

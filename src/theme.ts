@@ -1,4 +1,4 @@
-// Three Regions palette — warm dark kitchen tones (matches the scaffold).
+// Three Regions palette: warm dark kitchen tones (matches the scaffold).
 export const colors = {
   bg: "#1d1710",
   panel: "#2a2118",

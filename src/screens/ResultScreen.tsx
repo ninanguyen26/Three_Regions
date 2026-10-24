@@ -4,6 +4,7 @@ import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import { scoreDish, WRONG_PICK_PENALTY } from "../game/scorer";
 import { colors } from "../theme";
+import { VERB_COPY } from "./verbCopy";
 
 const MEDAL_LABEL = {
   gold: "GOLD",
@@ -14,6 +15,7 @@ const MEDAL_LABEL = {
 
 export default function ResultScreen({
   dish,
+  menu,
   basket,
   execution,
   onRetry,
@@ -21,13 +23,14 @@ export default function ResultScreen({
   onHome,
 }: {
   dish: Dish;
+  menu: Dish[];
   basket: string[];
   execution: number;
   onRetry: () => void;
   retryLabel?: string;
   onHome: () => void;
 }) {
-  const r = scoreDish(dish, basket, execution);
+  const r = scoreDish(dish, basket, execution, menu);
   const stamped = r.medal !== "fail";
   const miss = r.biggestMiss;
   const missName = miss ? INGREDIENT_BY_ID[miss.ingredientId]?.name : null;
@@ -45,15 +48,15 @@ export default function ResultScreen({
             <Text style={styles.stampText}>{MEDAL_LABEL[r.medal]}</Text>
           </View>
         ) : (
-          <Text style={styles.noStamp}>Under 80 — no stamp this time.</Text>
+          <Text style={styles.noStamp}>Under 80. No stamp this time.</Text>
         )}
         <Text style={styles.execLine}>
-          Pour execution: {Math.round(execution * 100)}%
+          {VERB_COPY[dish.verb].execution}: {Math.round(execution * 100)}%
         </Text>
         {r.wrongPicks.length > 0 ? (
           <Text style={styles.wrongLine}>
             Dinged:{" "}
-            {r.wrongPicks.map((id) => INGREDIENT_BY_ID[id]?.name).join(", ")} —{" "}
+            {r.wrongPicks.map((id) => INGREDIENT_BY_ID[id]?.name).join(", ")} ·{" "}
             {r.wrongPicks.length} unused pick
             {r.wrongPicks.length === 1 ? "" : "s"} × {WRONG_PICK_PENALTY} = −
             {r.wrongPickPenalty}
@@ -63,7 +66,7 @@ export default function ResultScreen({
 
       <Text style={styles.feedback}>
         {r.capped && missName
-          ? `No ${missName.toLowerCase()} at all — that's a signature ingredient, so the dish is capped at 79 no matter what else you nailed.`
+          ? `No ${missName.toLowerCase()} at all. That's a signature ingredient, so the dish is capped at 79 no matter what else you nailed.`
           : miss && miss.similarity < 1
             ? `Biggest miss: ${missPickedName ?? "nothing in that slot"} where it wanted ${missName}.`
             : "Every single slot got its exact ingredient."}
@@ -75,7 +78,7 @@ export default function ResultScreen({
         const got =
           s.pickedId != null
             ? INGREDIENT_BY_ID[s.pickedId]?.name
-            : "— nothing in the basket —";
+            : "(nothing in the basket)";
         const isMiss = miss != null && s.ingredientId === miss.ingredientId;
         return (
           <View key={s.ingredientId} style={[styles.row, isMiss && styles.rowMiss]}>

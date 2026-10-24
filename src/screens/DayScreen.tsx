@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import type { Dish } from "../data/types";
 import type { DayResult } from "../game/save";
 import { colors } from "../theme";
 
@@ -14,11 +15,13 @@ const MEDAL_LABEL = {
 export default function DayScreen({
   week,
   day,
+  dish,
   results,
   onCook,
 }: {
   week: number;
   day: string;
+  dish: Dish;
   results: DayResult[];
   onCook: () => void;
 }) {
@@ -26,7 +29,7 @@ export default function DayScreen({
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{day}</Text>
       <Text style={styles.sub}>
-        Week {week} · service — from Saturday's basket, no re-shopping midweek.
+        Week {week} · service, from Saturday's basket, no re-shopping midweek.
       </Text>
 
       {results.length > 0 ? (
@@ -34,14 +37,14 @@ export default function DayScreen({
           <Text style={styles.section}>So far this week</Text>
           {results.map((r) => (
             <Text key={r.day} style={styles.row}>
-              {r.day} — {r.percent}% {MEDAL_LABEL[r.medal]} · +${r.earned}
+              {r.day}: {r.percent}% {MEDAL_LABEL[r.medal]} · +${r.earned}
             </Text>
           ))}
         </>
       ) : null}
 
       <Pressable style={styles.cta} onPress={onCook}>
-        <Text style={styles.ctaText}>Cook Phở Bò →</Text>
+        <Text style={styles.ctaText}>Cook {dish.name} →</Text>
       </Pressable>
     </ScrollView>
   );

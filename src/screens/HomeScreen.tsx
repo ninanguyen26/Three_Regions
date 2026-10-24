@@ -1,10 +1,13 @@
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import type { ForecastNote } from "../game/forecast";
+import { FORECAST_PARKED, type ForecastNote } from "../game/forecast";
+import { DISHES } from "../data/dishes";
 import { colors } from "../theme";
 
+const STARTERS = DISHES.filter((d) => d.group === "starter");
+
 // The week hub: where every week starts. Forecast (from Week 2), the menu,
-// savings — then Saturday shopping kicks the week off.
+// savings. Then Saturday shopping kicks the week off.
 export default function HomeScreen({
   week,
   notes,
@@ -25,6 +28,7 @@ export default function HomeScreen({
 
       <Text style={styles.week}>Week {week}</Text>
 
+      {!FORECAST_PARKED && (
       <View style={styles.card}>
         <Text style={styles.cardLabel}>
           {week === 1
@@ -35,8 +39,8 @@ export default function HomeScreen({
         </Text>
         {week === 1 ? (
           <Text style={styles.note}>
-            The owners are running the show — no forecast yet. Learn the
-            kitchen; the forecast becomes yours in Week 3.
+            The owners are running the show, menu included. Your job this
+            week is learning the kitchen.
           </Text>
         ) : (
           notes.map((n) => (
@@ -47,15 +51,25 @@ export default function HomeScreen({
         )}
         {week === 2 ? (
           <Text style={styles.hint}>
-            One note for now — from Week 3 you get two, and they're yours to
-            plan from.
+            Her note, not yours. The owners plan the menu until the kitchen
+            is yours.
           </Text>
         ) : null}
       </View>
+      )}
 
       <View style={styles.card}>
         <Text style={styles.cardLabel}>On the menu this week</Text>
-        <Text style={styles.note}>Phở Bò</Text>
+        <View style={styles.dishRow}>
+          {STARTERS.map((d) => (
+            <View key={d.id} style={styles.dishChip}>
+              <Text style={styles.dishChipText}>{d.name}</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.note}>
+          The owners set the menu; Saturday's basket covers all of it.
+        </Text>
         <Text style={styles.hint}>
           Savings: ${savings} · Stamps so far: {totalStamps}
         </Text>
@@ -64,8 +78,8 @@ export default function HomeScreen({
       <Pressable style={styles.cta} onPress={onStart}>
         <Text style={styles.ctaText}>
           {week === 1
-            ? "Saturday — shop with the owners →"
-            : "Saturday — go to the market →"}
+            ? "Saturday: shop with the owners →"
+            : "Saturday: go to the market →"}
         </Text>
       </Pressable>
     </ScrollView>
@@ -87,6 +101,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   cardLabel: { color: colors.accent, fontSize: 13, fontWeight: "700" },
+  dishRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
+  dishChip: {
+    backgroundColor: colors.bg,
+    borderColor: colors.panelEdge,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  dishChipText: { color: colors.text, fontSize: 14, fontWeight: "600" },
   note: { color: colors.text, fontSize: 16, marginTop: 8, lineHeight: 22 },
   hint: { color: colors.muted, fontSize: 13, marginTop: 10, lineHeight: 18 },
   cta: {
