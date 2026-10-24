@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Three Regions",
+    "slug": "three-regions",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "jsEngine": "hermes",
+    "ios": {
+      "bundleIdentifier": "com.ngoc.threeregions",
+      "supportsTablet": true,
+      "appleTeamId": "9965C7BUB7"
+    },
+    "android": {
+      "package": "com.ngoc.threeregions"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
