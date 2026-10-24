@@ -5,6 +5,7 @@ import { DISH_BY_ID, DISHES } from "./src/data/dishes";
 import { INGREDIENT_BY_ID } from "./src/data/ingredients";
 import {
   CATEGORY_LABEL,
+  groupFixFor,
   trialStepsFor,
   worstCategory,
 } from "./src/game/trial";
@@ -48,7 +49,8 @@ type Screen =
 
 // Three Regions, the week loop:
 // weekend (forecast) -> Saturday market -> Sunday prep -> Sunday trial
-// (one locked dish, first free plus one re-trial; Week 1 cannot fail)
+// (one locked dish, first free plus one re-trial; Week 1 cannot fail:
+// guided repair loop, owner names the worst group until it passes)
 // -> Mon-Fri service (approved menu only, cooked from Saturday's basket)
 // -> Friday close -> next week. The whole loop state persists in
 // AsyncStorage.
@@ -91,7 +93,8 @@ export default function App() {
             : loaded.phase === "market"
               ? "weekend"
               : loaded.phase === "trial"
-                ? loaded.trialStep === "market"
+                ? loaded.trialStep === "market" ||
+                  loaded.trialStep === "repair"
                   ? "market"
                   : loaded.trialStep === "result"
                     ? "result"
@@ -175,8 +178,16 @@ export default function App() {
         ? `use ${correct} instead of ${picked}`
         : `${correct} is missing`
       : "fix the basket";
-    if (save.week === 1)
+    if (save.week === 1) {
+      const groupFix = groupFixFor(
+        trialDish,
+        save.basket ?? [],
+        shoppingDishes,
+      );
+      if (groupFix)
+        return `The owner rescues it for the staff meal and points at the ${groupFix.group}: ${groupFix.fixes.join("; ")}.`;
       return `The owner rescues it for the staff meal and points at the fix: ${fix}.`;
+    }
     if (r.percent >= 60) return `One fix: ${fix}.`;
     const worst = worstCategory(trialDish, save.basket ?? [], shoppingDishes);
     if (worst) return `Focus on the ${CATEGORY_LABEL[worst].toLowerCase()}.`;
@@ -218,8 +229,16 @@ export default function App() {
         "day",
       );
     } else if (trialCanRetry) {
+      // Week 1 repairs in place: market, then a direct re-score, no
+      // re-cook. Later weeks rebuild through the normal market-to-cook
+      // path for their one re-trial.
       apply(
-        { ...save, bestByDish, trialStep: "market", phase: "trial" },
+        {
+          ...save,
+          bestByDish,
+          trialStep: save.week === 1 ? "repair" : "market",
+          phase: "trial",
+        },
         "market",
       );
     } else {
@@ -262,6 +281,7 @@ export default function App() {
         <MarketScreen
           dishes={shoppingDishes}
           initialBasket={trialActive ? (save.basket ?? []) : undefined}
+          repair={trialActive && save.trialStep === "repair"}
           onBack={
             trialActive
               ? () =>
@@ -273,10 +293,15 @@ export default function App() {
           }
           onDone={(basket) =>
             trialActive
-              ? apply(
-                  { ...save, basket, trialStep: "cook", phase: "trial" },
-                  "cook",
-                )
+              ? save.trialStep === "repair"
+                ? apply(
+                    { ...save, basket, trialStep: "result", phase: "trial" },
+                    "result",
+                  )
+                : apply(
+                    { ...save, basket, trialStep: "cook", phase: "trial" },
+                    "cook",
+                  )
               : apply({ ...save, basket, phase: "prep" }, "prep")
           }
         />

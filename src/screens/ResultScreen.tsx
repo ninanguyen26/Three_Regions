@@ -114,7 +114,7 @@ export default function ResultScreen({
             {r.capped && missName
               ? `No ${missName.toLowerCase()} at all. That's a signature ingredient, so the dish is capped at 79 no matter what else you nailed.`
               : miss && miss.similarity < 1
-                ? `Biggest miss: ${missPickedName ?? "nothing in that slot"} where it wanted ${missName}.`
+                ? `Biggest miss: wanted ${missName}, got ${missPickedName ?? "nothing"}.`
                 : "Every single slot got its exact ingredient."}
           </Text>
 

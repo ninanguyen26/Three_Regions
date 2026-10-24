@@ -10,12 +10,15 @@ export default function MarketScreen({
   onDone,
   onBack,
   initialBasket,
+  repair,
 }: {
   dishes: Dish[];
   onDone: (basket: string[]) => void;
   onBack: () => void;
   /** A basket to start from, for rebuilding after a failed trial. */
   initialBasket?: string[];
+  /** Week 1 guided repair: the CTA re-scores instead of cooking. */
+  repair?: boolean;
 }) {
   // Free picking (Ngoc): anything on the shelf, no cap. One basket serves
   // the whole menu; the scorer takes each slot's best match, and picks no
@@ -103,7 +106,9 @@ export default function MarketScreen({
 
 
       <Pressable style={styles.cta} onPress={() => onDone(basket)}>
-        <Text style={styles.ctaText}>Start cooking →</Text>
+        <Text style={styles.ctaText}>
+          {repair ? "Show the owner →" : "Start cooking →"}
+        </Text>
       </Pressable>
     </ScrollView>
   );

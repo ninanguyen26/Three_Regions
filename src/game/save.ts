@@ -48,8 +48,9 @@ export interface SaveState {
   execution: number;
   /** Trial cooks completed this Sunday (first free, then one re-trial). */
   trialAttempts: number;
-  /** Where a Sunday trial stands, so a reload resumes it exactly. */
-  trialStep: "market" | "cook" | "result" | null;
+  /** Where a Sunday trial stands, so a reload resumes it exactly.
+   * repair = Week 1 guided loop: market, then a direct re-score. */
+  trialStep: "market" | "cook" | "result" | "repair" | null;
 }
 
 const KEY = "three-regions-save-v1";
@@ -103,7 +104,8 @@ export async function loadSave(): Promise<SaveState | null> {
     parsed.trialStep =
       parsed.trialStep === "market" ||
       parsed.trialStep === "cook" ||
-      parsed.trialStep === "result"
+      parsed.trialStep === "result" ||
+      parsed.trialStep === "repair"
         ? parsed.trialStep
         : null;
     return parsed;

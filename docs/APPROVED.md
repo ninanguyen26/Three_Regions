@@ -48,7 +48,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 
 - **Weeks 1–2 are tutorial mode; the official game starts Week 3.** The calendar (seasons, Tết countdown) ticks from day 1; only the rules change.
 - The restaurant does not start empty — only the player does: **house dishes** (the restaurant's existing menu, visible but grey, "not yours yet") vs **player stamps** (earned at 80%+; zero at start).
-- **Week 1 — Apprentice:** the owner drives; the 4 starter dishes are taught; guided shopping and prep; exact orders by name; forecast/spoilage/quests/cravings OFF; **cannot fail** (under 80% → she rescues the dish, it becomes the staff meal, same-day retry with the biggest-miss hint).
+- **Week 1 — Apprentice:** the owner drives; the 4 starter dishes are taught; guided shopping and prep; exact orders by name; forecast/spoilage/quests/cravings OFF; **cannot fail** (under 80% → she rescues the dish, it becomes the staff meal, same-day guided repair: she names the worst group and its exact fixes, the player fixes the basket and re-scores without re-cooking, repeating until it passes).
 - **Week 2 — Assisted:** simple weather-only forecast (the owner's note, teaching; the player-facing forecast is post-game only, see Placement above); she proposes the menu (player may override); prices on, waste forgiven; **texting opens** (the sister's first thread); first quest.
 - **Week 3 — graduation:** she hands over the menu book and market list and takes Sunday off. Full loop ON.
 
@@ -59,7 +59,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 ## Shopping
 
 - The shopping puzzle stays: a clue/description → go to market → pick the correct ingredients among plausible lookalikes, in a **limited set per dish**.
-- **Picking is free (Ngoc, 2026-10-23):** the basket is capped at the dish's ingredient count (phở = 10), but anything on the shelf can go in — all three noodles, if you want. The scorer takes each slot's **best match** from the basket; every pick no slot ends up using is a **wrong pick, dinged −6 each** (tuning constant in the scorer; Ngoc raised it from −3 the same night — too generous). A signature slot with *nothing* from its family still caps the dish.
+- **Picking is free (Ngoc, 2026-10-23):** the basket has no cap (removed 2026-10-24): a dish with 10 slots can hold 12 picks, and the 2 extra picks ding. Anything on the shelf can go in — all three noodles, if you want. The scorer takes each slot's **best match** from the basket; every pick no slot ends up using is a **wrong pick, dinged −6 each** (tuning constant in the scorer; Ngoc raised it from −3 the same night — too generous). A signature slot with *nothing* from its family still caps the dish.
 - Market picks **become** the cooking counter — a bad shop shows up in the cooking score; a missed signature ingredient caps it.
 - Weekly layer: quantities are the risk; market notes from the forecast (in-season, storms, scarcity) move prices and availability.
 
