@@ -56,6 +56,10 @@ export interface SaveState {
    * loop: picker, then a direct re-score. "market" is legacy: old
    * re-trial saves resume as a re-trial pick. */
   trialStep: "market" | "pick" | "cook" | "result" | "repair" | null;
+  /** Serves per regular id, across all weeks. Drives the guest album
+      reveal. Serve events do not exist yet (service days have no
+      customers), so this starts empty and stays empty until then. */
+  servesByRegular: Record<string, number>;
 }
 
 const KEY = "three-regions-save-v1";
@@ -77,6 +81,7 @@ export function freshSave(): SaveState {
     execution: 1,
     trialAttempts: 0,
     trialStep: null,
+    servesByRegular: {},
   };
 }
 
@@ -118,6 +123,14 @@ export async function loadSave(): Promise<SaveState | null> {
     // Stamps are a per-dish mark, not a count: drop the retired counter
     // from old saves instead of carrying it forward.
     delete (parsed as unknown as { totalStamps?: unknown }).totalStamps;
+    // Serves per regular: keep numeric counts, drop anything else.
+    const serves: Record<string, number> = {};
+    if (parsed.servesByRegular && typeof parsed.servesByRegular === "object") {
+      for (const [id, v] of Object.entries(parsed.servesByRegular)) {
+        if (typeof v === "number") serves[id] = v;
+      }
+    }
+    parsed.servesByRegular = serves;
     return parsed;
   } catch {
     return null;

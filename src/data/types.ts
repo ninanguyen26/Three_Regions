@@ -62,3 +62,26 @@ export interface Dish {
   history: string;
   funFact: string;
 }
+
+export interface Regular {
+  id: string;
+  /** Display name. The reviewer stays nameless by design (incognito). */
+  name: string;
+  /** One line: job plus Tampa anchor. */
+  who: string;
+  /** When they show up, in plain words. Text until the forecast derives
+      show-up percentages from routines. */
+  routine: string;
+  /** Voice spec, single source of truth for authored lines and generated
+      lines: tone tags, sentence style, never-dos. */
+  personality: string;
+  /** Concrete likes and dislikes. Hard traits are called out as hard. */
+  taste: string;
+  /** Signature order, as a dish id. Null for the reviewer, who orders
+      across the menu. */
+  favDishId: string | null;
+  /** What is going on in their life. Advances when served. */
+  story: string;
+  /** One concrete memorable detail. */
+  quirk: string;
+}

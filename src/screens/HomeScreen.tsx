@@ -13,6 +13,7 @@ export default function HomeScreen({
   savings,
   onStart,
   onRecipeBook,
+  onGuests,
   onReset,
 }: {
   week: number;
@@ -21,6 +22,7 @@ export default function HomeScreen({
   savings: number;
   onStart: () => void;
   onRecipeBook: () => void;
+  onGuests: () => void;
   onReset: () => void;
 }) {
   const approved = DISHES.filter((d) => (bestByDish[d.id] ?? 0) >= 80);
@@ -91,6 +93,10 @@ export default function HomeScreen({
         <Text style={styles.bookText}>Recipe book →</Text>
       </Pressable>
 
+      <Pressable onPress={onGuests} hitSlop={8} style={styles.guestsLink}>
+        <Text style={styles.guestsText}>Guests →</Text>
+      </Pressable>
+
       <Pressable
         onPress={() =>
           Alert.alert(
@@ -148,6 +154,8 @@ const styles = StyleSheet.create({
   ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
   bookLink: { alignItems: "center", marginTop: 16, paddingVertical: 6 },
   bookText: { color: colors.accent, fontSize: 14, fontWeight: "600" },
+  guestsLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
+  guestsText: { color: colors.accent, fontSize: 14, fontWeight: "600" },
   resetLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
   resetText: { color: colors.muted, fontSize: 14, fontWeight: "600" },
 });

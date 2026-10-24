@@ -34,6 +34,7 @@ import PrepScreen from "./src/screens/PrepScreen";
 import DayScreen from "./src/screens/DayScreen";
 import CloseScreen from "./src/screens/CloseScreen";
 import RecipeBookScreen from "./src/screens/RecipeBookScreen";
+import GuestsScreen from "./src/screens/GuestsScreen";
 import PickScreen from "./src/screens/PickScreen";
 
 type Screen =
@@ -46,7 +47,8 @@ type Screen =
   | "cook"
   | "result"
   | "close"
-  | "recipeBook";
+  | "recipeBook"
+  | "guests";
 
 // Three Regions, the week loop:
 // weekend (forecast) -> Saturday market -> Sunday prep -> Sunday trial
@@ -292,6 +294,7 @@ export default function App() {
           savings={save.savings}
           onStart={() => apply({ ...save, phase: "market" }, "market")}
           onRecipeBook={() => setScreen("recipeBook")}
+          onGuests={() => setScreen("guests")}
           onReset={reset}
         />
       )}
@@ -299,6 +302,13 @@ export default function App() {
         <RecipeBookScreen
           bestByDish={save.bestByDish ?? {}}
           menuIds={save.menuIds}
+          onBack={() => setScreen("weekend")}
+        />
+      )}
+      {screen === "guests" && (
+        <GuestsScreen
+          servesByRegular={save.servesByRegular ?? {}}
+          week={save.week}
           onBack={() => setScreen("weekend")}
         />
       )}
