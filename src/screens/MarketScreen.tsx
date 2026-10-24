@@ -1,65 +1,34 @@
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import type { Dish, IngredientCategory } from "../data/types";
+import type { Dish } from "../data/types";
 import { INGREDIENTS } from "../data/ingredients";
+import { MARKET_SECTIONS } from "../data/markets";
 import { colors } from "../theme";
-
-const CATEGORY_ORDER: IngredientCategory[] = [
-  "protein",
-  "noodle",
-  "bread",
-  "seasoning",
-  "aromatic",
-  "produce",
-  "herb",
-  "garnish",
-];
-
-const CATEGORY_LABEL: Record<IngredientCategory, string> = {
-  protein: "Protein",
-  noodle: "Noodles",
-  bread: "Bread",
-  seasoning: "Seasonings",
-  aromatic: "Aromatics",
-  produce: "Produce",
-  herb: "Herbs",
-  garnish: "Garnish",
-};
 
 export default function MarketScreen({
   dishes,
   onDone,
   onBack,
+  initialBasket,
 }: {
   dishes: Dish[];
   onDone: (basket: string[]) => void;
   onBack: () => void;
+  /** A basket to start from, for rebuilding after a failed trial. */
+  initialBasket?: string[];
 }) {
-  // Free picking (Ngoc): anything on the shelf, up to the menu's cap (the
-  // slots of every dish on the menu, added together). One basket serves
+  // Free picking (Ngoc): anything on the shelf, no cap. One basket serves
   // the whole menu; the scorer takes each slot's best match, and picks no
-  // dish on the menu uses get dinged.
-  const allSlots = dishes.flatMap((d) => d.slots);
-  const cap = allSlots.length;
-  const [basket, setBasket] = useState<string[]>([]);
-  const full = basket.length >= cap;
+  // dish on the menu uses get dinged six points each. That ding is the
+  // only brake: buying the whole shelf scores zero.
+  const [basket, setBasket] = useState<string[]>(initialBasket ?? []);
 
   const toggle = (ingredientId: string) =>
     setBasket((b) =>
       b.includes(ingredientId)
         ? b.filter((x) => x !== ingredientId)
-        : b.length < cap
-          ? [...b, ingredientId]
-          : b,
+        : [...b, ingredientId],
     );
-
-  const covered = (slot: Dish["slots"][number]) =>
-    basket.includes(slot.ingredientId) ||
-    slot.substitutes.some((s) => basket.includes(s.ingredientId));
-  const uncoveredCount = allSlots.filter((s) => !covered(s)).length;
-  const uncoveredSignature = allSlots.some(
-    (s) => s.tier === "signature" && !covered(s),
-  );
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
@@ -71,14 +40,13 @@ export default function MarketScreen({
         <Text style={styles.clueLabel}>This week's menu</Text>
         <Text style={styles.clue}>{dishes.map((d) => d.name).join(" · ")}</Text>
         <Text style={styles.clueHint}>
-          One basket covers the whole menu. Pick anything you like, up to{" "}
-          {cap} ingredients. Every dish this week is cooked and judged from
-          this basket.
+          One basket covers the whole menu. Pick anything you like. Every
+          dish this week is cooked and judged from this basket.
         </Text>
       </View>
 
       <Text style={styles.section}>
-        Your basket · {basket.length}/{cap}
+        Your basket · {basket.length}
       </Text>
       <View style={styles.basket}>
         {basket.length === 0 ? (
@@ -93,54 +61,46 @@ export default function MarketScreen({
           ))
         )}
       </View>
-      {full ? (
-        <Text style={styles.fullHint}>
-          Basket's full. Tap a basket item to put it back before adding
-          another.
-        </Text>
-      ) : null}
 
-      {CATEGORY_ORDER.map((cat) => (
-        <View key={cat}>
-          <Text style={styles.section}>{CATEGORY_LABEL[cat]}</Text>
-          <View style={styles.shelf}>
-            {INGREDIENTS.filter((i) => i.category === cat).map((ing) => {
-              const selected = basket.includes(ing.id);
-              return (
-                <Pressable
-                  key={ing.id}
-                  style={[styles.chip, selected && styles.chipSelected]}
-                  onPress={() => toggle(ing.id)}
-                >
-                  <Text
-                    style={[styles.chipText, selected && styles.chipTextSelected]}
-                  >
-                    {ing.name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+      {MARKET_SECTIONS.map((market) => (
+        <View key={market.title}>
+          <Text style={styles.section}>
+            {market.title} ·{" "}
+            {market.subsections.flatMap((s) => s.ids).length}
+          </Text>
+          {market.subsections.map((sub) => (
+            <View key={sub.title ?? market.title}>
+              {sub.title ? (
+                <Text style={styles.subSection}>{sub.title}</Text>
+              ) : null}
+              <View style={styles.shelf}>
+                {sub.ids.map((id) => {
+                  const ing = INGREDIENTS.find((i) => i.id === id);
+                  if (!ing) return null;
+                  const selected = basket.includes(id);
+                  return (
+                    <Pressable
+                      key={id}
+                      style={[styles.chip, selected && styles.chipSelected]}
+                      onPress={() => toggle(id)}
+                    >
+                      <Text
+                        style={[
+                          styles.chipText,
+                          selected && styles.chipTextSelected,
+                        ]}
+                      >
+                        {ing.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
         </View>
       ))}
 
-      {uncoveredSignature ? (
-        <Text style={styles.warn}>
-          {full
-            ? "A doubled-up pick is crowding out a signature ingredient. That caps its dish at 79."
-            : "A signature slot on the menu still has nothing at all. That caps its dish below the stamp, no matter what else you picked."}
-        </Text>
-      ) : uncoveredCount > 0 ? (
-        <Text style={styles.warn}>
-          {full
-            ? uncoveredCount === 1
-              ? "One pick is doubling up, and the slot it crowds out scores zero."
-              : `${uncoveredCount} picks are doubling up, and the slots they crowd out score zero.`
-            : uncoveredCount === 1
-              ? "1 of the menu's slots has nothing yet. Empty slots score zero."
-              : `${uncoveredCount} of the menu's slots have nothing yet. Empty slots score zero.`}
-        </Text>
-      ) : null}
 
       <Pressable style={styles.cta} onPress={() => onDone(basket)}>
         <Text style={styles.ctaText}>Start cooking →</Text>
@@ -173,6 +133,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: 1,
+  },
+  subSection: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 14,
+    marginBottom: 6,
   },
   basket: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   basketEmpty: { color: colors.muted, fontSize: 14 },

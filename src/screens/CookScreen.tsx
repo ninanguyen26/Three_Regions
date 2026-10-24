@@ -23,10 +23,15 @@ export default function CookScreen({
   dish,
   onServe,
   onBack,
+  trial,
+  trialSteps,
 }: {
   dish: Dish;
   onServe: (execution: number) => void;
   onBack: () => void;
+  /** When true this cook is an owner trial, and the steps below apply. */
+  trial?: boolean;
+  trialSteps?: string[];
 }) {
   const [fill, setFill] = useState(0);
   const [holding, setHolding] = useState(false);
@@ -85,6 +90,16 @@ export default function CookScreen({
       <Text style={styles.sub}>
         {dish.name} · {holdLower}, let go inside the golden band
       </Text>
+      {trial ? (
+        <View style={styles.trialBox}>
+          <Text style={styles.trialLabel}>Trial cook</Text>
+          {(trialSteps ?? []).map((s) => (
+            <Text key={s} style={styles.trialStep}>
+              · {s}
+            </Text>
+          ))}
+        </View>
+      ) : null}
 
       <View style={styles.gaugeWrap}>
         <View style={styles.gauge}>
@@ -135,6 +150,22 @@ const styles = StyleSheet.create({
   back: { color: colors.accent, fontSize: 15, fontWeight: "600" },
   title: { color: colors.text, fontSize: 28, fontWeight: "700", marginTop: 10 },
   sub: { color: colors.muted, fontSize: 14, marginTop: 6 },
+  trialBox: {
+    marginTop: 20,
+    backgroundColor: colors.panel,
+    borderColor: colors.panelEdge,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+  },
+  trialLabel: {
+    color: colors.accent,
+    fontSize: 13,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  trialStep: { color: colors.text, fontSize: 14, marginTop: 4 },
   gaugeWrap: {
     flexDirection: "row",
     alignItems: "flex-end",

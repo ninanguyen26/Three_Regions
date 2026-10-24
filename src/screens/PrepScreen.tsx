@@ -10,10 +10,13 @@ import { colors } from "../theme";
 export default function PrepScreen({
   dishes,
   basket,
+  trialDish,
   onStart,
 }: {
   dishes: Dish[];
   basket: string[];
+  /** The dish the owner trials after prep, if one is still locked. */
+  trialDish?: Dish | null;
   onStart: () => void;
 }) {
   return (
@@ -37,7 +40,9 @@ export default function PrepScreen({
         ))}
       </View>
       <Pressable style={styles.cta} onPress={onStart}>
-        <Text style={styles.ctaText}>Monday: start service →</Text>
+        <Text style={styles.ctaText}>
+          {trialDish ? "Sunday trial →" : "Monday: start service →"}
+        </Text>
       </Pressable>
     </ScrollView>
   );

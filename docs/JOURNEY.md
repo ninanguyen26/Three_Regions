@@ -25,7 +25,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 ## Proposals on the table (not locked)
 
 ### Scoring internals
-- Precomputed per-ingredient similarity (exact 1.0, close cousin 0.85–0.95, distant 0.5–0.7, missing 0) — never runtime raw text embeddings: offline, deterministic, explainable. Weighted signature > support > garnish. Hands-on execution as a small deduction (exact + sloppy ≈ 92; exact + clean ≈ 98–100). Below 80, feedback is a single biggest-miss line.
+- Precomputed per-ingredient similarity (exact 1.0, close cousin 0.85–0.95, distant 0.5–0.7, missing 0) — never runtime raw text embeddings: offline, deterministic, explainable. Weighted signature > support > garnish. Hands-on execution as a small deduction (exact + sloppy ≈ 92; exact + clean ≈ 98–100). Below 80, feedback is a single biggest-miss line. Superseded in part 2026-10-24 (APPROVED.md, the two judges): bad gets the biggest miss exactly, really bad gets only the worst part.
 - Scorer acceptance cases to test before any UI: exact = 100; one 0.93 sub still gold-able; signature miss capped; garnish miss ≈ 95–97; two close subs = silver.
 
 ### Service flow numbers
@@ -80,6 +80,16 @@ Anti-grind rule is locked (APPROVED.md); the templates are not: variant cook · 
 - Stack: no cloud LLM. Tier 1 = `compromise` + authored flavor lexicon + all-MiniLM-L6-v2 embeddings **precomputed at authoring time**, shipped as JSON, runtime cosine in TypeScript. Tier 2 (only if free text) = onnxruntime-react-native + quantized MiniLM (~23MB). Content cost ≈40 short texts for 8 regulars.
 - Storyboard drafts for every texting contact were drafted in chat on 2026-10-23 (sister / owner / Trâm / market auntie / former cook / daughter, husband via daughter) — drafts, not yet written into any doc as canon.
 
+### Failed-dish names (diary) — agreed 2026-10-24 (decided form in APPROVED.md, under The two judges)
+- When a trial cook lands bad or really bad, the on-device text model names what the player actually made, and the name goes in a diary (journal), not on the main menu.
+- The prompt is built from scorer facts, not freeform: attempted dish, verb, score and tier, biggest miss with its similarity, the other swaps, wrong picks. The model phrases the facts in the owner's voice; it does not invent a name from nothing.
+- Worked example (real scorer run): bún chả trial, basket chicken / pork belly / dried noodles / fish sauce / yellow onion / lemongrass / carrots / Thai basil / lemon, scores 78.8, bad, not capped, no wrong picks, biggest miss signature ground pork replaced by chicken at 0.35. Name: "The Chicken Pretender." Owner line: "Close. The smoke is right and the grill is right, but those patties are chicken pretending to be pork, and I can taste the pretending."
+- Cost: free and offline. No server, no per-call fee, no cloud model anywhere in this game. The model is the same on-device text model already planned for live craving talk, reconstruction, and texting, so naming is one more generation on infrastructure already paid for; the only network moment, if any, is the one-time model download or bundle.
+- Storage: the name, week, attempted dish, tier and score, owner line, and the fix are stored in the save on first generation, so the diary entry never changes on later views.
+- Guardrails: short, owner-voiced, affectionate rather than mocking, grounded in the actual basket. A really bad cook has thin facts (most slots zero), so its name comes out vague by design, matching an owner who cannot recognize what was made.
+- Menu status: diary yes (agreed 2026-10-24); main menu no. A failed dish reaches customers only if a separate experiments / house-specials section is ever built, with its own cheap price and no stamp progress. That section is proposal only.
+- Agreed 2026-10-24 (Ngoc): diary + generated names stay, with the unlock ladder (prep note at ok, history at silver, fun fact at gold), the two cheap help systems (bad: biggest miss exactly; really bad: worst part only), and the dish/request separation. Decided form is in APPROVED.md; this section is the working history.
+
 ### Graphics budget (proposal numbers)
 ~3 backgrounds (kitchen counter, grocery aisle, dining counter) · ~70 ingredient icons (the main art spend, reused everywhere) · 6–8 tools/vessels · dish images **composed from layers** (bowl + broth color + noodle/rice + protein + garnish) showing the player's actual picks · juice from Skia particles + sound + stamp slam · cut for V1: staff scheduling, seating puzzles, dishwashing, detailed finances.
 
@@ -97,10 +107,11 @@ Schema → scorer as pure function (paper cases first) → phở end-to-end ugly
 
 - **The Vietnamese-American chapter** (parked by Ngoc, "hold off for now"): Viet-Cajun crawfish, garlic noodles, brisket phở, bánh mì po'boy, bò lúc lắc. Proposal on record: they resurface as the food-truck couple's menu (cooked by them, mentored by the player).
 - **Central reserves:** bánh bột lọc (Wrap), bún mắm nêm (Toss) — proposed, not picked; Central has no Wrap dish and no pungent-signature dish without them.
+- **Sister reconstruction puzzle** (parked 2026-10-24 after the complexity flag): the texting reconstruction system (vague memory, question chips, fragments on a card, guess by trait overlap, photo sharpening) is not V1. The thread that tipped into too complicated; the two-stage judge, diary, ladder, and help systems were kept instead.
 
 ## Still open (Ngoc's calls, undecided)
 
-- **Customer traits / recipe tweaks** (Ngoc's idea, 2026-10-23): the cheap variety in the game is customers and customer groups (high spicy tolerance → more chili pepper), tweaking the recipe at cook time. Discussed, not decided. It is also what exposed the forecast problem above: the forecast is decided but has nothing to act on yet.
+- **Customer traits / recipe tweaks** (Ngoc's idea, 2026-10-23): the cheap variety in the game is customers and customer groups (high spicy tolerance → more chili pepper), tweaking the recipe at cook time. Discussed, not decided. It is also what exposed the forecast problem above: the forecast is decided but has nothing to act on yet. Separation model agreed 2026-10-24 (dish record canonical, request on the order, two scores shown separately; slot-changing cooks count for the customer, not the medal — APPROVED.md); the traits themselves are still undecided.
 
 - **Tết** — Ngoc: "not sure what to do with Tet yet." Options: (a) annual event week in endless mode, (b) final chapter timed to a last Tết before the owners depart, (c) both. Assets in place: thịt kho (anchor dish), Bà Lệ (anchor character, proposal cast), and — discovered via the photo catalog — **Gasparilla (late Jan) collides with Tết season**, giving the calendar a two-festival week.
 - **The economy:** buyout price, dish prices, weekly earnings, upgrade costs — never set; they derive from run length, which derives from the (decided) progression + finale gates but hasn't been computed.

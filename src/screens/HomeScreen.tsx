@@ -1,26 +1,31 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FORECAST_PARKED, type ForecastNote } from "../game/forecast";
 import { DISHES } from "../data/dishes";
 import { colors } from "../theme";
-
-const STARTERS = DISHES.filter((d) => d.group === "starter");
 
 // The week hub: where every week starts. Forecast (from Week 2), the menu,
 // savings. Then Saturday shopping kicks the week off.
 export default function HomeScreen({
   week,
   notes,
+  bestByDish,
   savings,
   totalStamps,
   onStart,
+  onRecipeBook,
+  onReset,
 }: {
   week: number;
   notes: ForecastNote[];
+  bestByDish: Record<string, number>;
   savings: number;
   totalStamps: number;
   onStart: () => void;
+  onRecipeBook: () => void;
+  onReset: () => void;
 }) {
+  const approved = DISHES.filter((d) => (bestByDish[d.id] ?? 0) >= 80);
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Three Regions</Text>
@@ -39,8 +44,8 @@ export default function HomeScreen({
         </Text>
         {week === 1 ? (
           <Text style={styles.note}>
-            The owners are running the show, menu included. Your job this
-            week is learning the kitchen.
+            Your first week. The owners guide you while you learn the
+            kitchen.
           </Text>
         ) : (
           notes.map((n) => (
@@ -51,8 +56,7 @@ export default function HomeScreen({
         )}
         {week === 2 ? (
           <Text style={styles.hint}>
-            Her note, not yours. The owners plan the menu until the kitchen
-            is yours.
+            Her note, not yours.
           </Text>
         ) : null}
       </View>
@@ -60,18 +64,22 @@ export default function HomeScreen({
 
       <View style={styles.card}>
         <Text style={styles.cardLabel}>On the menu this week</Text>
-        <View style={styles.dishRow}>
-          {STARTERS.map((d) => (
-            <View key={d.id} style={styles.dishChip}>
-              <Text style={styles.dishChipText}>{d.name}</Text>
-            </View>
-          ))}
-        </View>
+        {approved.length > 0 ? (
+          <View style={styles.dishRow}>
+            {approved.map((d) => (
+              <View key={d.id} style={styles.dishChip}>
+                <Text style={styles.dishChipText}>{d.name}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.note}>No dishes approved yet.</Text>
+        )}
         <Text style={styles.note}>
-          The owners set the menu; Saturday's basket covers all of it.
+          Dishes join the menu by passing the owner's trial.
         </Text>
         <Text style={styles.hint}>
-          Savings: ${savings} · Stamps so far: {totalStamps}
+          Savings: ${savings} · Stamps so far: {approved.length}
         </Text>
       </View>
 
@@ -81,6 +89,27 @@ export default function HomeScreen({
             ? "Saturday: shop with the owners →"
             : "Saturday: go to the market →"}
         </Text>
+      </Pressable>
+
+      <Pressable onPress={onRecipeBook} hitSlop={8} style={styles.bookLink}>
+        <Text style={styles.bookText}>Recipe book →</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() =>
+          Alert.alert(
+            "Start over?",
+            "This erases your current save and starts a new game at Week 1.",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "Reset", style: "destructive", onPress: onReset },
+            ],
+          )
+        }
+        hitSlop={8}
+        style={styles.resetLink}
+      >
+        <Text style={styles.resetText}>Reset save</Text>
       </Pressable>
     </ScrollView>
   );
@@ -121,4 +150,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  bookLink: { alignItems: "center", marginTop: 16, paddingVertical: 6 },
+  bookText: { color: colors.accent, fontSize: 14, fontWeight: "600" },
+  resetLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
+  resetText: { color: colors.muted, fontSize: 14, fontWeight: "600" },
 });
