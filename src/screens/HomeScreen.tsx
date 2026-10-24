@@ -11,7 +11,6 @@ export default function HomeScreen({
   notes,
   bestByDish,
   savings,
-  totalStamps,
   onStart,
   onRecipeBook,
   onReset,
@@ -20,7 +19,6 @@ export default function HomeScreen({
   notes: ForecastNote[];
   bestByDish: Record<string, number>;
   savings: number;
-  totalStamps: number;
   onStart: () => void;
   onRecipeBook: () => void;
   onReset: () => void;
@@ -78,9 +76,7 @@ export default function HomeScreen({
         <Text style={styles.note}>
           Dishes join the menu by passing the owner's trial.
         </Text>
-        <Text style={styles.hint}>
-          Savings: ${savings} · Stamps so far: {approved.length}
-        </Text>
+        <Text style={styles.hint}>Savings: ${savings}</Text>
       </View>
 
       <Pressable style={styles.cta} onPress={onStart}>

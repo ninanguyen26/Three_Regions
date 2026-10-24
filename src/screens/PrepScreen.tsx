@@ -6,7 +6,7 @@ import { colors } from "../theme";
 
 // Sunday prep. A stub for now: the real prep mechanics (broths, pickles,
 // marinades) plug in here later. Today it frames the week: everything
-// Mon-Fri cooks the week's menu from Saturday's basket.
+// Mon-Fri is picked from Saturday's basket.
 export default function PrepScreen({
   dishes,
   basket,
@@ -29,8 +29,8 @@ export default function PrepScreen({
         </View>
       ))}
       <Text style={styles.body}>
-        Everything Monday to Friday cooks off this menu, from Saturday's
-        basket:
+        Everything Monday to Friday is picked from Saturday's basket
+        {trialDish ? ", which also holds the trial shopping" : ""}:
       </Text>
       <View style={styles.chips}>
         {basket.map((id) => (
@@ -39,9 +39,12 @@ export default function PrepScreen({
           </View>
         ))}
       </View>
+      {trialDish ? (
+        <Text style={styles.dishName}>Then the trial: {trialDish.name}</Text>
+      ) : null}
       <Pressable style={styles.cta} onPress={onStart}>
         <Text style={styles.ctaText}>
-          {trialDish ? "Sunday trial →" : "Monday: start service →"}
+          {trialDish ? `Trial ${trialDish.name} →` : "Monday: start service →"}
         </Text>
       </Pressable>
     </ScrollView>

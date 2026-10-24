@@ -1,10 +1,8 @@
 // Three Regions: trial helpers. Pure functions, no UI, no I/O.
 //
-// The trial cook shows one generic step per ingredient category present
-// in the trial basket (empty categories skipped), and a failed trial's
-// one-direction line names only the worst category, never an ingredient.
-// Week 1 guided repair names the worst group and its exact fixes, one
-// group at a time, until the trial passes.
+// A failed trial's one-direction line names only the worst category,
+// never an ingredient. Week 1 guided repair names the worst group and
+// its exact fixes, one group at a time, until the trial passes.
 
 import { scoreDish } from "./scorer";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
@@ -31,29 +29,6 @@ export const CATEGORY_LABEL: Record<IngredientCategory, string> = {
   herb: "Herbs",
   garnish: "Garnish",
 };
-
-export const CATEGORY_STEP: Record<IngredientCategory, string> = {
-  protein: "Sear the proteins",
-  noodle: "Cook the noodles",
-  bread: "Toast the bread",
-  seasoning: "Add the seasonings",
-  aromatic: "Bloom the aromatics",
-  produce: "Prep the produce",
-  herb: "Tear the herbs",
-  garnish: "Finish with the garnish",
-};
-
-/** One generic step per category present in the basket, in shelf order. */
-export function trialStepsFor(basket: string[]): string[] {
-  const present = new Set<IngredientCategory>();
-  for (const id of basket) {
-    const cat = INGREDIENT_BY_ID[id]?.category;
-    if (cat) present.add(cat);
-  }
-  return CATEGORY_ORDER.filter((c) => present.has(c)).map(
-    (c) => CATEGORY_STEP[c],
-  );
-}
 
 /**
  * The category whose slots lost the most points, or null when no slot

@@ -4,32 +4,29 @@ import type { Dish } from "../data/types";
 import type { DayResult } from "../game/save";
 import { colors } from "../theme";
 
-const MEDAL_LABEL = {
-  gold: "GOLD",
-  silver: "SILVER",
-  stamped: "STAMPED",
-  fail: "no stamp",
-} as const;
-
-// One service day: cook the week's dish from Saturday's basket.
+// One service day: pick the week's dish from Saturday's basket, or top
+// up at the market first.
 export default function DayScreen({
   week,
   day,
   dish,
   results,
   onCook,
+  onMarket,
 }: {
   week: number;
   day: string;
   dish: Dish;
   results: DayResult[];
   onCook: () => void;
+  onMarket: () => void;
 }) {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{day}</Text>
       <Text style={styles.sub}>
-        Week {week} · service, from Saturday's basket, no re-shopping midweek.
+        Week {week} · service. Pick today's dish from the basket, or top up
+        at the market.
       </Text>
 
       {results.length > 0 ? (
@@ -37,7 +34,7 @@ export default function DayScreen({
           <Text style={styles.section}>So far this week</Text>
           {results.map((r) => (
             <Text key={r.day} style={styles.row}>
-              {r.day}: {r.percent}% {MEDAL_LABEL[r.medal]} · +${r.earned}
+              {r.day}: {r.percent}% · +${r.earned}
             </Text>
           ))}
         </>
@@ -45,6 +42,9 @@ export default function DayScreen({
 
       <Pressable style={styles.cta} onPress={onCook}>
         <Text style={styles.ctaText}>Cook {dish.name} →</Text>
+      </Pressable>
+      <Pressable style={styles.market} onPress={onMarket}>
+        <Text style={styles.marketText}>Market →</Text>
       </Pressable>
     </ScrollView>
   );
@@ -73,4 +73,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  market: {
+    marginTop: 12,
+    backgroundColor: colors.panel,
+    borderColor: colors.panelEdge,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: "center",
+  },
+  marketText: { color: colors.accent, fontSize: 16, fontWeight: "700" },
 });

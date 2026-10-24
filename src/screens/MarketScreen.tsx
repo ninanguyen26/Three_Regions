@@ -10,20 +10,24 @@ export default function MarketScreen({
   onDone,
   onBack,
   initialBasket,
-  repair,
+  ctaLabel,
+  backLabel,
 }: {
   dishes: Dish[];
   onDone: (basket: string[]) => void;
   onBack: () => void;
-  /** A basket to start from, for rebuilding after a failed trial. */
+  /** A basket to start from, for adding to it midweek. */
   initialBasket?: string[];
-  /** Week 1 guided repair: the CTA re-scores instead of cooking. */
-  repair?: boolean;
+  /** CTA override for the midweek detour, which returns, not cooks. */
+  ctaLabel?: string;
+  /** Back label override for the midweek detour, which returns. */
+  backLabel?: string;
 }) {
-  // Free picking (Ngoc): anything on the shelf, no cap. One basket serves
-  // the whole menu; the scorer takes each slot's best match, and picks no
-  // dish on the menu uses get dinged six points each. That ding is the
-  // only brake: buying the whole shelf scores zero.
+  // Free picking (Ngoc): anything on the shelf, no cap. One basket is the
+  // week's purchased pool; each dish is picked from it before cooking,
+  // and only the pick is judged, so unpicked items ding nothing. The
+  // only brake on buying the whole shelf is the pick itself: pick junk
+  // and it dings.
   const [basket, setBasket] = useState<string[]>(initialBasket ?? []);
 
   const toggle = (ingredientId: string) =>
@@ -36,15 +40,15 @@ export default function MarketScreen({
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Pressable onPress={onBack} hitSlop={10}>
-        <Text style={styles.back}>← Home</Text>
+        <Text style={styles.back}>{backLabel ?? "← Home"}</Text>
       </Pressable>
       <Text style={styles.title}>The Market</Text>
       <View style={styles.clueCard}>
         <Text style={styles.clueLabel}>This week's menu</Text>
         <Text style={styles.clue}>{dishes.map((d) => d.name).join(" · ")}</Text>
         <Text style={styles.clueHint}>
-          One basket covers the whole menu. Pick anything you like. Every
-          dish this week is cooked and judged from this basket.
+          One basket covers the whole menu. Pick anything you like. Each
+          dish this week is picked from this basket before it is cooked.
         </Text>
       </View>
 
@@ -106,9 +110,7 @@ export default function MarketScreen({
 
 
       <Pressable style={styles.cta} onPress={() => onDone(basket)}>
-        <Text style={styles.ctaText}>
-          {repair ? "Show the owner →" : "Start cooking →"}
-        </Text>
+        <Text style={styles.ctaText}>{ctaLabel ?? "Start cooking →"}</Text>
       </Pressable>
     </ScrollView>
   );

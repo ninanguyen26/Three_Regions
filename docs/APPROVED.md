@@ -42,12 +42,13 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 - **Calendar (Ngoc, 2026-10-23):** the in-fiction year starts in **early January** — Week 1 is the first week of January. Tết + Gasparilla land around weeks 5–7 as the first festival test.
 - **Placement (Ngoc, 2026-10-24):** the pick-2 forecast is a **post-game system**. It switches on when the player owns the restaurant (all 28 dishes learned, buyout done), because that is when menu planning becomes the player's job; with the full roster and menu responsibility, the notes drive real choices (what to feature, how much to prep, Friday's sold-vs-waste). Before the buyout there is **no player-facing forecast**: Week 1 has none, and Week 2's single gentle weather note is the *owner's*, shown as teaching while she still plans the menu. The apprentice cooks and learns; the owners plan.
 - **Forecast generation (Ngoc approved Muse's proposal, 2026-10-23):** forecasts are **assembled, not pre-authored** — the game is infinite, so notes are composed from fragments (condition × phrasing variant × implication clause, tagged by craving and crowd). Anchor events are pinned to calendar dates and return yearly (tradition, not repetition). Weather is drawn from **Tampa climate tables** weighted by month and is **sticky** (a pattern holds 1–3 weeks, wearing a fresh phrasing each week). Every fragment pool draws as a **bag** — no replacement until the pool empties — plus a **~10-week cooldown** per fragment, so a note can't resurface for most of a game-year. No runtime AI text generation.
+- **Weekend percentage forecast (Ngoc, 2026-10-24):** a separate forecast system from the season/weather/event notes above. During the weekend, while the restaurant is closed, the player sees for each service day the percentage that each regular/special customer will show up, with a tentative cap of 3 featured regular/special customers per day. Other customers ask for nothing special and are not featured. The player shops from this forecast. It shows every week, apprentice included.
 - Friday close is scored twice: how well you cooked, and how well you planned (sold vs waste). Earnings tick into the buyout savings.
 
 ## Cold start
 
 - **Weeks 1–2 are tutorial mode; the official game starts Week 3.** The calendar (seasons, Tết countdown) ticks from day 1; only the rules change.
-- The restaurant does not start empty — only the player does: **house dishes** (the restaurant's existing menu, visible but grey, "not yours yet") vs **player stamps** (earned at 80%+; zero at start).
+- The restaurant does not start empty — only the player does: **house dishes** (the restaurant's existing menu, visible but grey, "not yours yet") vs **player dishes** (approved at 80%+; none at start).
 - **Week 1 — Apprentice:** the owner drives; the 4 starter dishes are taught; guided shopping and prep; exact orders by name; forecast/spoilage/quests/cravings OFF; **cannot fail** (under 80% → she rescues the dish, it becomes the staff meal, same-day guided repair: she names the worst group and its exact fixes, the player fixes the basket and re-scores without re-cooking, repeating until it passes).
 - **Week 2 — Assisted:** simple weather-only forecast (the owner's note, teaching; the player-facing forecast is post-game only, see Placement above); she proposes the menu (player may override); prices on, waste forgiven; **texting opens** (the sister's first thread); first quest.
 - **Week 3 — graduation:** she hands over the menu book and market list and takes Sunday off. Full loop ON.
@@ -71,7 +72,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
   - Cà phê trứng's whisk runs on the Toss engine.
 - **Scoring (Ngoc's numbers): stamp at 80% similarity, Silver at 90%+, Gold at 95%+.** Framing: 80 = on the menu, 90 = house favorite, 95 = signature. Below stamp: **bad 60–79** (recognizable, not approved), **really bad below 60** (unrecognizable).
 - A **missing signature ingredient caps the medal**.
-- **Trial cooking steps, ingredient-level grouping (Ngoc, 2026-10-24):** trial cook steps are grouped by ingredient category, not by dish slot. Each ingredient has one fixed category (protein, noodle, bread, seasoning, aromatic, produce, herb, garnish); each category has one generic instruction (examples: sear the proteins, cut the produce). The trial cook screen builds steps from the trial basket, grouping picks by category; a category with no picks is skipped, with no step shown. An ingredient's category never changes per dish; a different use needs a different ingredient entry (shredded cabbage is garnish, not produce).
+- **Ingredient categories are fixed (Ngoc, 2026-10-24):** each ingredient has one fixed category (protein, noodle, bread, seasoning, aromatic, produce, herb, garnish); a category never changes per dish, a different use needs a different ingredient entry (shredded cabbage is garnish, not produce). Categories drive the worst-part direction and the Week 1 repair groups. The trial cook screen shows no step list (removed 2026-10-24: basket-category steps read like a prep list on top of the verb and misfired per dish).
 
 ## The two judges (owner trial + customer service) — agreed 2026-10-24
 
@@ -130,7 +131,7 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 
 ## Ruled out (decided — do not re-add)
 
-- Per-customer forecasts, predictions, and reservation notes.
+- Per-customer forecasts, predictions, and reservation notes (the unbounded 2026-10-23 dashboard version; the capped weekend percentage forecast in The week is a separate decided system, not this).
 - The Week-1 self-declaration question ("have you had Vietnamese food before?").
 - The hand-over / second-location ending (replaced by the buyout).
 - A deceased-husband backstory (he is alive and working).
@@ -140,3 +141,4 @@ Status: **build started 2026-10-23** — scaffolded at `~/Documents/Projs/Three_
 ## Content rules
 - **No em-dashes anywhere in the game's database** (Ngoc, 2026-10-23): every authored data text (forecast fragments, dish clues, histories, ingredient text) is written without the "—" character; commas, colons, and full sentences do the joining instead. Scrubbed to zero the night the rule was set: the forecast fragments, the phở clue and history, the schema, and every screen's UI copy and code comments. Note: forecast notes persist as text in the save, so a note generated before a text fix keeps its old wording on screen until the next week generates fresh notes.
 - **Midweek top-up shopping** (Ngoc's proposal, 2026-10-23, shape agreed in discussion): service days cook from Saturday's basket; if something is missing or wrong, the player can buy it midweek at **150%** of the Saturday price. Top-up only (no full re-shop), applies from the purchase day forward, never rewrites days already served. Needs ingredient prices to exist; a simple per-ingredient price list comes first when this is built.
+- **Out of stock midweek (Ngoc, 2026-10-24):** when a recipe ingredient runs out midweek, the player chooses: top up at 150%, refuse that customer's order, or serve with what they have (cook short; missing ingredients score as missing).

@@ -21,8 +21,7 @@ const UNLOCK_NAMES: Record<number, string> = {
 
 export default function ResultScreen({
   dish,
-  menu,
-  basket,
+  pick,
   execution,
   prevBest,
   onRetry,
@@ -34,8 +33,8 @@ export default function ResultScreen({
   onTrialCta,
 }: {
   dish: Dish;
-  menu: Dish[];
-  basket: string[];
+  /** This cook's pick. Only the pick is judged, never the whole basket. */
+  pick: string[];
   execution: number;
   /** Best percent for this dish before this cook; undefined if never cooked. */
   prevBest?: number;
@@ -50,7 +49,7 @@ export default function ResultScreen({
   trialCtaLabel?: string;
   onTrialCta?: () => void;
 }) {
-  const r = scoreDish(dish, basket, execution, menu);
+  const r = scoreDish(dish, pick, execution);
   // A failed trial hides the breakdown: the owner's one fix or one
   // direction is the whole help, and the breakdown would hand the recipe
   // to a dish that has not been approved yet.
@@ -58,7 +57,6 @@ export default function ResultScreen({
   const prev = prevBest ?? 0;
   const newBest = Math.max(prev, r.percent);
   const crossed = [80, 90, 95].filter((t) => prev < t && t <= newBest);
-  const stamped = r.medal !== "fail";
   const miss = r.biggestMiss;
   const missName = miss ? INGREDIENT_BY_ID[miss.ingredientId]?.name : null;
   const missPickedName =
@@ -75,13 +73,13 @@ export default function ResultScreen({
 
       <View style={styles.scoreBox}>
         <Text style={styles.percent}>{r.percent}%</Text>
-        {stamped ? (
+        {r.medal === "gold" || r.medal === "silver" ? (
           <View style={styles.stamp}>
             <Text style={styles.stampText}>{MEDAL_LABEL[r.medal]}</Text>
           </View>
-        ) : (
-          <Text style={styles.noStamp}>Under 80. No stamp this time.</Text>
-        )}
+        ) : r.medal === "fail" ? (
+          <Text style={styles.noStamp}>Under 80.</Text>
+        ) : null}
         <Text style={styles.execLine}>
           {VERB_COPY[dish.verb].execution}: {Math.round(execution * 100)}%
         </Text>
@@ -124,7 +122,7 @@ export default function ResultScreen({
             const got =
               s.pickedId != null
                 ? INGREDIENT_BY_ID[s.pickedId]?.name
-                : "(nothing in the basket)";
+                : "(not picked)";
             const isMiss = miss != null && s.ingredientId === miss.ingredientId;
             return (
               <View key={s.ingredientId} style={[styles.row, isMiss && styles.rowMiss]}>
@@ -190,7 +188,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 18,
     paddingVertical: 6,
-    transform: [{ rotate: "-6deg" }],
+    transform: [{ rotate: "-6deg" }] ,
   },
   stampText: {
     color: colors.accent,

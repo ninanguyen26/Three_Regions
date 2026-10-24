@@ -5,8 +5,8 @@ import { initialForecastState } from "./forecast";
 import { DISH_BY_ID } from "../data/dishes";
 
 // Three Regions: the save. One JSON blob in AsyncStorage: the week loop's
-// whole state (week, phase, basket, results, savings, forecast machinery),
-// so closing the app mid-week resumes where you left off.
+// whole state (week, phase, basket, pick, results, savings, forecast
+// machinery), so closing the app mid-week resumes where you left off.
 
 export type Phase = "weekend" | "market" | "prep" | "trial" | "service" | "close";
 
@@ -31,14 +31,17 @@ export interface SaveState {
   week: number;
   phase: Phase;
   savings: number;
-  totalStamps: number;
   /** This week's forecast notes (Weeks 1: none, 2: one gentle note). */
   notes: ForecastNote[];
   forecastState: ForecastState;
   /** This week's menu (dish ids). Saturday's basket serves all of it. */
   menuIds: string[];
-  /** Saturday's basket. The week's menu is cooked from it all week. */
+  /** Saturday's basket, plus midweek top-ups. Each dish is picked from
+   * it before cooking; only the pick is judged. */
   basket: string[] | null;
+  /** The latest cook's pick, so a result screen still scores right
+   * after a reload, and repair and re-trial picks start from it. */
+  pick: string[] | null;
   results: DayResult[];
   /** Best percent per dish id, across trial and service cooks. The medal
    * derives from it; it only ever moves up. */
@@ -49,8 +52,10 @@ export interface SaveState {
   /** Trial cooks completed this Sunday (first free, then one re-trial). */
   trialAttempts: number;
   /** Where a Sunday trial stands, so a reload resumes it exactly.
-   * repair = Week 1 guided loop: market, then a direct re-score. */
-  trialStep: "market" | "cook" | "result" | "repair" | null;
+   * pick = picking (first trial or a re-trial); repair = Week 1 guided
+   * loop: picker, then a direct re-score. "market" is legacy: old
+   * re-trial saves resume as a re-trial pick. */
+  trialStep: "market" | "pick" | "cook" | "result" | "repair" | null;
 }
 
 const KEY = "three-regions-save-v1";
@@ -60,13 +65,13 @@ export function freshSave(): SaveState {
     week: 1,
     phase: "weekend",
     savings: 0,
-    totalStamps: 0,
     notes: [],
     forecastState: initialForecastState(),
     // The menu starts empty. Dishes join it one at a time by passing
     // the owner's trial, never by being starters.
     menuIds: [],
     basket: null,
+    pick: null,
     results: [],
     bestByDish: {},
     execution: 1,
@@ -103,11 +108,16 @@ export async function loadSave(): Promise<SaveState | null> {
       typeof parsed.trialAttempts === "number" ? parsed.trialAttempts : 0;
     parsed.trialStep =
       parsed.trialStep === "market" ||
+      parsed.trialStep === "pick" ||
       parsed.trialStep === "cook" ||
       parsed.trialStep === "result" ||
       parsed.trialStep === "repair"
         ? parsed.trialStep
         : null;
+    parsed.pick = Array.isArray(parsed.pick) ? parsed.pick : null;
+    // Stamps are a per-dish mark, not a count: drop the retired counter
+    // from old saves instead of carrying it forward.
+    delete (parsed as unknown as { totalStamps?: unknown }).totalStamps;
     return parsed;
   } catch {
     return null;
