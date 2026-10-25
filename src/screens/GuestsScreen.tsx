@@ -6,7 +6,7 @@ import { isAlbumVisible, patAway, revealState } from "../game/guests";
 import { colors } from "../theme";
 
 // Guest album: the regulars, revealed in stages. Unmet regulars show
-// as ???. Meeting one (first serve) reveals name, who, and routine.
+// as ???. Meeting one (first serve) reveals name and who.
 // More serves reveal taste and signature order. Knowing one well
 // reveals story and quirk. Serve events do not exist yet (service days
 // have no customers), so every regular starts unmet.
@@ -44,16 +44,14 @@ export default function GuestsScreen({
         </View>
         {state === "unmet" ? (
           <Text style={styles.note}>
-            {away ? "Away until November." : "Not met yet."}
+            {away ? "Away until next season." : "Not met yet."}
           </Text>
         ) : (
           <>
             <Text style={styles.fieldLabel}>Who</Text>
             <Text style={styles.fieldText}>{selected.who}</Text>
-            <Text style={styles.fieldLabel}>Routine</Text>
-            <Text style={styles.fieldText}>{selected.routine}</Text>
             {away ? (
-              <Text style={styles.fieldText}>Away until November.</Text>
+              <Text style={styles.fieldText}>Away until next season.</Text>
             ) : null}
             {state === "learned" || state === "known" ? (
               <>
@@ -105,10 +103,10 @@ export default function GuestsScreen({
               </Text>
               <Text style={styles.rowSub}>
                 {away
-                  ? "Away until November"
+                  ? "Away until next season"
                   : state === "unmet"
                     ? "Not met yet."
-                    : r.routine}
+                    : r.who}
               </Text>
             </View>
           </Pressable>

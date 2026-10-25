@@ -170,7 +170,6 @@ export const MARKET_SECTIONS: MarketSection[] = [
           "honey",
           "evaporated-milk",
           "coconut-water",
-          "pickled-carrots",
           "dill-pickles",
           "yellow-split-peas",
           "lentils",
@@ -198,6 +197,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ids: [
           "arabica-coffee",
           "instant-coffee",
+          "condensed-milk",
           "pork-rinds",
           "coconut-flakes",
           "cashews",
@@ -240,7 +240,6 @@ export const MARKET_SECTIONS: MarketSection[] = [
           "fish-sauce",
           "regular-fish-sauce",
           "hoisin-sauce",
-          "fish-sauce-dip",
           "maggi-seasoning",
           "kewpie-mayo",
           "oyster-sauce",
@@ -248,7 +247,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
           "hue-shrimp-paste",
           "chili-oil",
           "caramel-sauce",
-          "pork-peanut-sauce",
+          "peanut-sesame-sauce",
         ],
       },
       {
@@ -269,7 +268,6 @@ export const MARKET_SECTIONS: MarketSection[] = [
       {
         title: "Dessert and coffee supplies",
         ids: [
-          "condensed-milk",
           "robusta-coffee",
           "mung-bean",
           "peeled-mung-bean",

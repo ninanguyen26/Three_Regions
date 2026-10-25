@@ -47,8 +47,8 @@ Ngoc's problem (2026-10-23): the game is infinite, forecasts can't all be pre-au
 - The list itself is provisionally locked (APPROVED.md). Still proposal: per-verb mini-game specifics (Chop = evenness/rhythm, Pound = rhythm + stop-at-texture, Toss/Sear share a circular engine, Pour = amount/steadiness, Wrap = fold sequence/tightness, Simmer = per-dish cue window) and the unlock order (Wk1 Pour/Wrap/Chop + Taste, Wk2 Toss/Pound, Wk3+ Sear/Simmer; new verb = pause-and-learn first 2 uses).
 - **Verb imbalance flagged:** Simmer 7, Sear 7, Pour 5, Chop 3, Toss 2, Wrap 2, Pound 1. Options: reassign some primaries, use scored secondaries more widely, or accept it (dishes within a verb differ by cue).
 
-### The regulars (16, all proposal — placeholder names)
-Written in full at Ngoc's instruction (2026-10-23); **none individually approved.** Restored 2026-10-24: the original DESIGN.md §6 wording was lost when DESIGN was split (the cast was compressed to a one-line list in the move). This section is rebuilt from the 2026-10-23 memory log, which recorded each regular's profile, arc, and gameplay job at write-in time. Lines marked *(tweaks)* come from the 2026-10-23 customer-tweak discussion and are additions, not part of the original write-in.
+### The regulars (16, APPROVED 2026-10-24)
+Written in full at Ngoc's instruction (2026-10-23); **approved in full 2026-10-24** (full cards in `src/data/regulars.ts`). Day routines dropped 2026-10-24 (see APPROVED): show-up is fav-driven; Hạnh orders vegan bún bò Huế whenever it is on the menu. Restored 2026-10-24: the original DESIGN.md §6 wording was lost when DESIGN was split (the cast was compressed to a one-line list in the move). This section is rebuilt from the 2026-10-23 memory log, which recorded each regular's profile, arc, and gameplay job at write-in time. Lines marked *(tweaks)* come from the 2026-10-23 customer-tweak discussion and are additions, not part of the original write-in.
 
 1. **Ông Hiển** (60s, homesick Hanoian): the strict North judge. *(tweaks)* His heat is black pepper, and he is the teacher of the sugar-in-a-northern-dish penalty: sweeten his phở and you learn about it.
 2. **Bà Lệ** (70s, the oldest customer): canh chua every Friday. The emotional core of the game, and the Tết anchor candidate.
@@ -57,15 +57,15 @@ Written in full at Ngoc's instruction (2026-10-23); **none individually approved
 5. **Rosa** (50s, Cuban-American bakery neighbor, Ybor): bread and coffee culture, the block-party arc, Tampa identity in the cast.
 6. **Danny** (20s, broke USF student, non-Viet): the slang craving voice (the NLP contrast case). His arc ends in a graduation-dinner menu-build quest. *(tweaks)* High spicy tolerance.
 7. **Miss Pat** (70s snowbird, November to April only): seasonality as a person, and an annual return in endless mode. *(tweaks)* Zero chili.
-8. **Bé Na** (8, with her mom): a picky kid at war with cilantro. Teaches garnish-omission and kid service. *(tweaks)* No cilantro, kid-mild.
+8. **Lucy** (8, with her mom Sarah): a picky kid at war with cilantro. Teaches garnish-omission and kid service. *(tweaks)* No cilantro, kid-mild.
 9. **Marcus** (40s, mail carrier): forecast with a face (the gossip system), and comic relief.
-10. **Trâm** (22, international student from Saigon; also a texting contact): misses 2020s Saigon and politely disagrees with the owner's decades-old memory of it. The third craving voice.
+10. **Trâm** (22, international student from Saigon; also a texting contact): misses 2020s Saigon and politely disagrees with the owner's decades-old memory of it. The third craving voice. Markers: Trời ơi + nè only, authored-only, sparse; no gendered address toward the player.
 11. **The reviewer**: an incognito Tampa food writer. Event regular: the reveal, the highest-stakes service in the game, and a published review.
 12. **Grace** (40s, Filipino-American night-shift nurse): the sinigang ↔ canh chua kinship voice.
-13. **The retired rival chef**: a peer-level judge. Late-game, he teaches his signature dish, one neither owner knows.
+13. **Ông Vinh** (retired rival chef): a peer-level judge. Late-game, he teaches his signature dish, one neither owner knows.
 14. **Anh Dũng** (30s, construction worker from Quảng Ngãi): the working-class Central regular, saving to bring his wife over.
 15. **Linh** (30s, Viet-Am catering coordinator): the event pipeline: banquet menu-build quests and economy spikes.
-16. **The food-truck couple** (20s, Viet-Am): students and mentees whose truck opens in post-game. The parked Viet-Am dishes live on *their* menu, cooked by them, mentored by the player.
+16. **Kevin and Jenny** (food-truck couple, 20s, Viet-Am): students and mentees whose truck opens in post-game. The parked Viet-Am dishes live on *their* menu, cooked by them, mentored by the player.
 
 - Cast-count flag from the original write-in: busts became 9 (owner + daughter + the first 7 regulars), one over the §10 graphics sketch of 8. Ngoc has since said customer graphics do not constrain cast size.
 - Also proposal: the daughter carries the diaspora arc (specificity lives in the cast, not the player).

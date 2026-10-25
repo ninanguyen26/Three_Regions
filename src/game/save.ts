@@ -36,6 +36,9 @@ export interface SaveState {
   forecastState: ForecastState;
   /** This week's menu (dish ids). Saturday's basket serves all of it. */
   menuIds: string[];
+  /** FIFO rotation order over approved dish ids. The weekly pool is
+   * the first 5. Dishes join it by passing the owner's trial. */
+  poolQueue: string[];
   /** Saturday's basket, plus midweek top-ups. Each dish is picked from
    * it before cooking; only the pick is judged. */
   basket: string[] | null;
@@ -52,7 +55,7 @@ export interface SaveState {
   /** Trial cooks completed this Sunday (first free, then one re-trial). */
   trialAttempts: number;
   /** Where a Sunday trial stands, so a reload resumes it exactly.
-   * pick = picking (first trial or a re-trial); repair = Week 1 guided
+   * pick = picking (first trial or a re-trial); repair = tutorial guided
    * loop: picker, then a direct re-score. "market" is legacy: old
    * re-trial saves resume as a re-trial pick. */
   trialStep: "market" | "pick" | "cook" | "result" | "repair" | null;
@@ -74,6 +77,8 @@ export function freshSave(): SaveState {
     // The menu starts empty. Dishes join it one at a time by passing
     // the owner's trial, never by being starters.
     menuIds: [],
+    // The pool rotation queue starts empty; dishes join it by trial.
+    poolQueue: [],
     basket: null,
     pick: null,
     results: [],
@@ -107,6 +112,18 @@ export async function loadSave(): Promise<SaveState | null> {
         )
       : [];
     parsed.menuIds = known;
+    // The pool queue: keep known dish ids in order, drop anything else.
+    // Saves from before the pool start from the menu order.
+    const queue = Array.isArray(parsed.poolQueue)
+      ? [
+          ...new Set(
+            parsed.poolQueue.filter(
+              (id) => typeof id === "string" && known.includes(id),
+            ),
+          ),
+        ]
+      : known;
+    parsed.poolQueue = queue;
     parsed.execution =
       typeof parsed.execution === "number" ? parsed.execution : 1;
     parsed.trialAttempts =

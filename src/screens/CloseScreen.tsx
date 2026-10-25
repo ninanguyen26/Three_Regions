@@ -10,13 +10,11 @@ import { colors } from "../theme";
 // dish in book order not yet approved), so it always agrees with the
 // trial that follows.
 export default function CloseScreen({
-  week,
   results,
   savings,
   nextTrialDish,
   onNext,
 }: {
-  week: number;
   results: DayResult[];
   savings: number;
   /** Next week's trial dish, if one is still locked. */
@@ -27,10 +25,9 @@ export default function CloseScreen({
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Friday Close</Text>
-      <Text style={styles.sub}>Week {week} · done</Text>
 
-      {results.map((r) => (
-        <Text key={r.day} style={styles.row}>
+      {results.map((r, i) => (
+        <Text key={`${r.day}-${i}`} style={styles.row}>
           {r.day}: {r.percent}% · +${r.earned}
         </Text>
       ))}
@@ -49,7 +46,7 @@ export default function CloseScreen({
       </Text>
 
       <Pressable style={styles.cta} onPress={onNext}>
-        <Text style={styles.ctaText}>Start Week {week + 1} →</Text>
+        <Text style={styles.ctaText}>Next week →</Text>
       </Pressable>
     </ScrollView>
   );

@@ -1,15 +1,15 @@
 import React from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FORECAST_PARKED, type ForecastNote } from "../game/forecast";
-import { DISHES } from "../data/dishes";
+import type { Dish } from "../data/types";
 import { colors } from "../theme";
 
-// The week hub: where every week starts. Forecast (from Week 2), the menu,
+// The home hub: where each week starts. Forecast (parked), the menu,
 // savings. Then Saturday shopping kicks the week off.
 export default function HomeScreen({
   week,
   notes,
-  bestByDish,
+  pool,
   savings,
   onStart,
   onRecipeBook,
@@ -18,20 +18,17 @@ export default function HomeScreen({
 }: {
   week: number;
   notes: ForecastNote[];
-  bestByDish: Record<string, number>;
+  pool: Dish[];
   savings: number;
   onStart: () => void;
   onRecipeBook: () => void;
   onGuests: () => void;
   onReset: () => void;
 }) {
-  const approved = DISHES.filter((d) => (bestByDish[d.id] ?? 0) >= 80);
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Three Regions</Text>
       <Text style={styles.sub}>One kitchen. Three regions.</Text>
-
-      <Text style={styles.week}>Week {week}</Text>
 
       {!FORECAST_PARKED && (
       <View style={styles.card}>
@@ -64,9 +61,9 @@ export default function HomeScreen({
 
       <View style={styles.card}>
         <Text style={styles.cardLabel}>On the menu this week</Text>
-        {approved.length > 0 ? (
+        {pool.length > 0 ? (
           <View style={styles.dishRow}>
-            {approved.map((d) => (
+            {pool.map((d) => (
               <View key={d.id} style={styles.dishChip}>
                 <Text style={styles.dishChipText}>{d.name}</Text>
               </View>
@@ -83,9 +80,9 @@ export default function HomeScreen({
 
       <Pressable style={styles.cta} onPress={onStart}>
         <Text style={styles.ctaText}>
-          {week === 1
-            ? "Saturday: shop with the owners →"
-            : "Saturday: go to the market →"}
+          {pool.length >= 5
+            ? "Saturday: go to the market →"
+            : "Saturday: shop with the owners →"}
         </Text>
       </Pressable>
 
@@ -101,7 +98,7 @@ export default function HomeScreen({
         onPress={() =>
           Alert.alert(
             "Start over?",
-            "This erases your current save and starts a new game at Week 1.",
+            "This erases your current save and starts a new game.",
             [
               { text: "Cancel", style: "cancel" },
               { text: "Reset", style: "destructive", onPress: onReset },
@@ -122,7 +119,6 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   title: { color: colors.text, fontSize: 34, fontWeight: "700", marginTop: 12 },
   sub: { color: colors.accent, fontSize: 16, marginTop: 6 },
-  week: { color: colors.text, fontSize: 24, fontWeight: "700", marginTop: 34 },
   card: {
     marginTop: 16,
     backgroundColor: colors.panel,

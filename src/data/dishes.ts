@@ -138,7 +138,6 @@ export const DISHES: Dish[] = [
         ingredientId: "hoisin-sauce",
         tier: "core",
         substitutes: [
-          { ingredientId: "fish-sauce-dip", similarity: 0.7 },
           { ingredientId: "soy-sauce", similarity: 0.3 },
         ],
       },
@@ -214,7 +213,6 @@ export const DISHES: Dish[] = [
         ingredientId: "pickled-carrot-daikon",
         tier: "core",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.7 },
           { ingredientId: "carrots", similarity: 0.3 },
         ],
       },
@@ -335,7 +333,6 @@ export const DISHES: Dish[] = [
         ingredientId: "pickled-carrot-daikon",
         tier: "support",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.7 },
           { ingredientId: "carrots", similarity: 0.3 },
         ],
       },
@@ -414,7 +411,6 @@ export const DISHES: Dish[] = [
         ingredientId: "pickled-carrot-daikon",
         tier: "support",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.88 },
           { ingredientId: "carrots", similarity: 0.5 },
         ],
       },
@@ -946,7 +942,6 @@ export const DISHES: Dish[] = [
         ingredientId: "pickled-carrot-daikon",
         tier: "garnish",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.88 },
           { ingredientId: "carrots", similarity: 0.5 },
         ],
       },
@@ -1347,11 +1342,11 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "fish-sauce-dip",
+        ingredientId: "fish-sauce",
         tier: "support",
         substitutes: [
-          { ingredientId: "fish-sauce", similarity: 0.85 },
-          { ingredientId: "regular-fish-sauce", similarity: 0.8 },
+          { ingredientId: "regular-fish-sauce", similarity: 0.92 },
+          { ingredientId: "soy-sauce", similarity: 0.45 },
         ],
       },
       {
@@ -1407,7 +1402,7 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "pork-peanut-sauce",
+        ingredientId: "peanut-sesame-sauce",
         tier: "signature",
         substitutes: [
           { ingredientId: "peanut-butter", similarity: 0.8 },
@@ -1450,7 +1445,6 @@ export const DISHES: Dish[] = [
         ingredientId: "pickled-carrot-daikon",
         tier: "support",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.9 },
           { ingredientId: "carrots", similarity: 0.6 },
         ],
       },
@@ -1531,11 +1525,11 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "fish-sauce-dip",
+        ingredientId: "fish-sauce",
         tier: "support",
         substitutes: [
-          { ingredientId: "fish-sauce", similarity: 0.85 },
-          { ingredientId: "regular-fish-sauce", similarity: 0.8 },
+          { ingredientId: "regular-fish-sauce", similarity: 0.92 },
+          { ingredientId: "soy-sauce", similarity: 0.45 },
         ],
       },
       {
@@ -1547,10 +1541,9 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "pickled-carrots",
+        ingredientId: "pickled-carrot-daikon",
         tier: "support",
         substitutes: [
-          { ingredientId: "pickled-carrot-daikon", similarity: 0.9 },
           { ingredientId: "carrots", similarity: 0.65 },
         ],
       },
@@ -1735,11 +1728,11 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "fish-sauce-dip",
+        ingredientId: "fish-sauce",
         tier: "garnish",
         substitutes: [
-          { ingredientId: "fish-sauce", similarity: 0.85 },
-          { ingredientId: "soy-sauce", similarity: 0.4 },
+          { ingredientId: "regular-fish-sauce", similarity: 0.92 },
+          { ingredientId: "soy-sauce", similarity: 0.45 },
         ],
       },
     ],
@@ -1971,7 +1964,7 @@ export const DISHES: Dish[] = [
         ingredientId: "carrots",
         tier: "core",
         substitutes: [
-          { ingredientId: "pickled-carrots", similarity: 0.6 },
+          { ingredientId: "pickled-carrot-daikon", similarity: 0.6 },
           { ingredientId: "zucchini", similarity: 0.5 },
         ],
       },
@@ -2159,7 +2152,7 @@ export const DISHES: Dish[] = [
         tier: "support",
         substitutes: [
           { ingredientId: "tomato", similarity: 0.7 },
-          { ingredientId: "pickled-carrots", similarity: 0.3 },
+          { ingredientId: "pickled-carrot-daikon", similarity: 0.3 },
         ],
       },
       {

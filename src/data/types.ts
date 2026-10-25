@@ -69,9 +69,6 @@ export interface Regular {
   name: string;
   /** One line: job plus Tampa anchor. */
   who: string;
-  /** When they show up, in plain words. Text until the forecast derives
-      show-up percentages from routines. */
-  routine: string;
   /** Voice spec, single source of truth for authored lines and generated
       lines: tone tags, sentence style, never-dos. */
   personality: string;

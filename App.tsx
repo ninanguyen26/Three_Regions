@@ -16,6 +16,12 @@ import {
 } from "./src/game/forecast";
 import { scoreDish } from "./src/game/scorer";
 import {
+  dayPool,
+  dishesPerDay,
+  poolIds,
+  queueOnApproval,
+} from "./src/game/pool";
+import {
   DAYS,
   EARNINGS,
   clearSave,
@@ -52,8 +58,9 @@ type Screen =
 
 // Three Regions, the week loop:
 // weekend (forecast) -> Saturday market -> Sunday prep -> Sunday trial
-// (one locked dish, first free plus one re-trial; Week 1 cannot fail:
-// guided repair loop, owner names the worst group until it passes)
+// (one locked dish at a time; tutorial trials cannot fail: guided
+// repair loop, owner names the worst group until it passes; after
+// graduation, one free trial plus one paid re-trial)
 // -> Mon-Fri service (approved menu only, picked from Saturday's basket)
 // -> Friday close -> next week. The whole loop state persists in
 // AsyncStorage.
@@ -163,20 +170,45 @@ export default function App() {
     );
   }
 
-  const dayIndex = save.results.length;
   const menu = save.menuIds.flatMap((id) =>
     DISH_BY_ID[id] ? [DISH_BY_ID[id]] : [],
   );
+  // Graduated once 5 dishes are approved: the menu and restaurant open,
+  // and service runs from the pool. Before that, trials only.
+  const graduated = menu.length >= 5;
+  // After this trial's approval, the count grows by one: the 5th approval
+  // graduates the player in the same week.
+  const graduatedAfter = menu.length >= 4;
+  // The weekly pool: the first 5 dishes in FIFO rotation order. Old
+  // saves without a queue fall back to the menu order.
+  const pool = poolIds(save.poolQueue ?? save.menuIds).flatMap((id) =>
+    DISH_BY_ID[id] ? [DISH_BY_ID[id]] : [],
+  );
+  // One service day cooks 4 of the 5 pool dishes, each once. The dish
+  // that sits out rotates daily in pool order, so each pool dish cooks
+  // 4 days a week and sits out once. Pools under 5 serve whole.
+  const perDay = dishesPerDay(pool.length);
+  const dayIndex = Math.floor(save.results.length / perDay);
+  const cookInDay = save.results.length % perDay;
+  const dayDishes = dayPool(pool, dayIndex);
   // The trial dish is the first dish in book order the player has not
   // approved yet: starters in service order, then chapters in book order.
   // One dish unlocks at a time, so the menu grows one approval at a time.
   const trialDish =
     DISHES.find((d) => (save.bestByDish?.[d.id] ?? 0) < 80) ?? null;
-  const shoppingDishes = trialDish ? [...menu, trialDish] : menu;
+  // Saturday shopping: the pool plus the trial dish once graduated,
+  // the trial dish only before graduation (no service yet).
+  const shoppingDishes = graduated
+    ? trialDish
+      ? [...pool, trialDish]
+      : pool
+    : trialDish
+      ? [trialDish]
+      : [];
   const trialActive = save.phase === "trial" && trialDish != null;
   const dish = trialActive
     ? (trialDish as (typeof DISHES)[number])
-    : (menu[dayIndex % menu.length] ?? DISH_BY_ID["pho-bo"]);
+    : (dayDishes[cookInDay] ?? DISH_BY_ID["pho-bo"]);
   // The pick screen's entry, set by every navigation into it (and by
   // resume). Falls back to a fresh service pick when absent.
   const pickMode = pickEntry?.mode ?? "service";
@@ -194,7 +226,7 @@ export default function App() {
     if (!trialActive || !trialDish || !trialScore) return undefined;
     const r = trialScore;
     if (r.percent >= 80)
-      return `Approved. ${trialDish.name} joins the menu and serves this week.`;
+      return `Approved. ${trialDish.name} joins the menu${graduatedAfter ? " and serves this week" : ""}.`;
     const miss = r.biggestMiss;
     const correct = miss
       ? INGREDIENT_BY_ID[miss.ingredientId]?.name
@@ -208,7 +240,7 @@ export default function App() {
         ? `use ${correct} instead of ${picked}`
         : `${correct} is missing`
       : "fix the pick";
-    if (save.week === 1) {
+    if (!graduated) {
       const groupFix = groupFixFor(trialDish, save.pick ?? []);
       if (groupFix)
         return `The owner rescues it for the staff meal and points at the ${groupFix.group}: ${groupFix.fixes.join("; ")}.`;
@@ -221,15 +253,19 @@ export default function App() {
       return "Cut the extra picks. Only pick what the dish needs.";
     return "Start over with the pick.";
   })();
-  const trialCanRetry = save.week === 1 || trialAttempts < 2;
+  const trialCanRetry = !graduated || trialAttempts < 2;
   const trialCtaLabel =
     !trialActive || !trialScore
       ? undefined
       : trialScore.percent >= 80
-        ? "Continue to service →"
+        ? graduatedAfter
+          ? "Continue to service →"
+          : "Friday close →"
         : trialCanRetry
           ? "Fix the pick →"
-          : "Continue to service →";
+          : graduated
+            ? "Continue to service →"
+            : "Friday close →";
   const handleTrialCta = () => {
     if (!trialActive || !trialDish || !trialScore) return;
     const bestByDish = {
@@ -243,28 +279,34 @@ export default function App() {
       const menuIds = save.menuIds.includes(trialDish.id)
         ? save.menuIds
         : [...save.menuIds, trialDish.id];
+      const poolQueue = queueOnApproval(
+        save.poolQueue ?? save.menuIds,
+        trialDish.id,
+      );
+      const toService = graduatedAfter;
       apply(
         {
           ...save,
           bestByDish,
           menuIds,
+          poolQueue,
           trialAttempts: 0,
           trialStep: null,
-          phase: "service",
+          phase: toService ? "service" : "close",
         },
-        "day",
+        toService ? "day" : "close",
       );
     } else if (trialCanRetry) {
-      // Week 1 repairs in place: picker, then a direct re-score, no
-      // re-cook. Later weeks re-pick and cook again for their one re-trial.
+      // Tutorial repairs in place: picker, then a direct re-score, no
+      // re-cook. Post-graduation re-trials re-pick and cook again.
       // Both start from the failed pick.
-      const mode = save.week === 1 ? "repair" : "retrial";
+      const mode = !graduated ? "repair" : "retrial";
       setPickEntry({ mode, initial: save.pick ?? [] });
       apply(
         {
           ...save,
           bestByDish,
-          trialStep: save.week === 1 ? "repair" : "pick",
+          trialStep: !graduated ? "repair" : "pick",
           phase: "trial",
         },
         "pick",
@@ -276,9 +318,9 @@ export default function App() {
           bestByDish,
           trialAttempts: 0,
           trialStep: null,
-          phase: "service",
+          phase: graduated ? "service" : "close",
         },
-        "day",
+        graduated ? "day" : "close",
       );
     }
   };
@@ -290,7 +332,7 @@ export default function App() {
         <HomeScreen
           week={save.week}
           notes={save.notes}
-          bestByDish={save.bestByDish ?? {}}
+          pool={pool}
           savings={save.savings}
           onStart={() => apply({ ...save, phase: "market" }, "market")}
           onRecipeBook={() => setScreen("recipeBook")}
@@ -314,7 +356,7 @@ export default function App() {
       )}
       {screen === "market" && (
         <MarketScreen
-          dishes={marketReturn != null ? menu : shoppingDishes}
+          dishes={marketReturn != null ? pool : shoppingDishes}
           initialBasket={save.basket ?? []}
           ctaLabel={marketReturn != null ? "Done →" : undefined}
           backLabel={marketReturn != null ? "← Back" : undefined}
@@ -340,7 +382,7 @@ export default function App() {
       )}
       {screen === "prep" && (
         <PrepScreen
-          dishes={menu}
+          dishes={pool}
           basket={save.basket ?? []}
           trialDish={trialDish}
           onStart={() => {
@@ -358,10 +400,11 @@ export default function App() {
       )}
       {screen === "day" && (
         <DayScreen
-          week={save.week}
           day={DAYS[dayIndex]}
           dish={dish}
+          dishes={dayDishes}
           results={save.results}
+          todayResults={save.results.filter((r) => r.day === DAYS[dayIndex])}
           onCook={() => {
             setPickEntry({ mode: "service", initial: [] });
             setScreen("pick");
@@ -496,7 +539,11 @@ export default function App() {
           execution={save.execution ?? 1}
           prevBest={save.bestByDish?.[dish.id]}
           retryLabel={
-            dayIndex >= 4 ? "Friday close →" : "Next day →"
+            save.results.length + 1 >= 5 * perDay
+              ? "Friday close →"
+              : (save.results.length + 1) % perDay === 0
+                ? "Next day →"
+                : "Next dish →"
           }
           trial={trialActive}
           trialVerdict={trialVerdict}
@@ -515,7 +562,7 @@ export default function App() {
               earned: EARNINGS[r.medal],
             };
             const results = [...save.results, result];
-            if (results.length >= 5) {
+            if (results.length >= 5 * perDay) {
               apply(
                 {
                   ...save,
@@ -537,7 +584,6 @@ export default function App() {
       )}
       {screen === "close" && (
         <CloseScreen
-          week={save.week}
           results={save.results}
           savings={save.savings}
           nextTrialDish={trialDish}

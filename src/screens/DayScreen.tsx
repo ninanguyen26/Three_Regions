@@ -4,20 +4,24 @@ import type { Dish } from "../data/types";
 import type { DayResult } from "../game/save";
 import { colors } from "../theme";
 
-// One service day: pick the week's dish from Saturday's basket, or top
-// up at the market first.
+// One service day: cook the day's dishes from Saturday's basket, or
+// top up at the market first.
 export default function DayScreen({
-  week,
   day,
   dish,
+  dishes,
   results,
+  todayResults,
   onCook,
   onMarket,
 }: {
-  week: number;
   day: string;
   dish: Dish;
+  /** This day's dishes, in pool order: 4 of the 5 pool dishes. */
+  dishes: Dish[];
   results: DayResult[];
+  /** Today's cooks so far, in cook order, matching dishes by position. */
+  todayResults: DayResult[];
   onCook: () => void;
   onMarket: () => void;
 }) {
@@ -25,20 +29,30 @@ export default function DayScreen({
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{day}</Text>
       <Text style={styles.sub}>
-        Week {week} · service. Pick today's dish from the basket, or top up
-        at the market.
+        Cook today's dishes from the basket, or top up at the market.
       </Text>
 
       {results.length > 0 ? (
         <>
           <Text style={styles.section}>So far this week</Text>
-          {results.map((r) => (
-            <Text key={r.day} style={styles.row}>
+          {results.map((r, i) => (
+            <Text key={`${r.day}-${i}`} style={styles.row}>
               {r.day}: {r.percent}% · +${r.earned}
             </Text>
           ))}
         </>
       ) : null}
+
+      <Text style={styles.section}>Today's dishes</Text>
+      {dishes.map((d, i) => {
+        const done = todayResults[i];
+        return (
+          <Text key={d.id} style={styles.row}>
+            {d.name}
+            {done ? ` · ${done.percent}%` : ""}
+          </Text>
+        );
+      })}
 
       <Pressable style={styles.cta} onPress={onCook}>
         <Text style={styles.ctaText}>Cook {dish.name} →</Text>
