@@ -2,7 +2,7 @@ import React from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FORECAST_PARKED, type ForecastNote } from "../game/forecast";
 import type { Dish } from "../data/types";
-import { colors } from "../theme";
+import { colors, fonts } from "../theme";
 
 // The home hub: where each week starts. Forecast (parked), the menu,
 // savings. Then Saturday shopping kicks the week off.
@@ -117,8 +117,8 @@ export default function HomeScreen({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 20, paddingBottom: 40 },
-  title: { color: colors.text, fontSize: 34, fontWeight: "700", marginTop: 12 },
-  sub: { color: colors.accent, fontSize: 16, marginTop: 6 },
+  title: { color: colors.text, fontSize: 34, fontFamily: fonts.display, marginTop: 12 },
+  sub: { color: colors.accent, fontSize: 16, fontFamily: fonts.body, marginTop: 6 },
   card: {
     marginTop: 16,
     backgroundColor: colors.panel,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
   },
-  cardLabel: { color: colors.accent, fontSize: 13, fontWeight: "700" },
+  cardLabel: { color: colors.accent, fontSize: 13, fontFamily: fonts.bodyBold },
   dishRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
   dishChip: {
     backgroundColor: colors.bg,
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  dishChipText: { color: colors.text, fontSize: 14, fontWeight: "600" },
-  note: { color: colors.text, fontSize: 16, marginTop: 8, lineHeight: 22 },
-  hint: { color: colors.muted, fontSize: 13, marginTop: 10, lineHeight: 18 },
+  dishChipText: { color: colors.text, fontSize: 14, fontFamily: fonts.bodySemi },
+  note: { color: colors.text, fontSize: 16, fontFamily: fonts.body, marginTop: 8, lineHeight: 22 },
+  hint: { color: colors.muted, fontSize: 13, fontFamily: fonts.body, marginTop: 10, lineHeight: 18 },
   cta: {
     marginTop: 26,
     backgroundColor: colors.accent,
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: "#241a0e", fontSize: 16, fontFamily: fonts.bodyBold },
   bookLink: { alignItems: "center", marginTop: 16, paddingVertical: 6 },
-  bookText: { color: colors.accent, fontSize: 14, fontWeight: "600" },
+  bookText: { color: colors.accent, fontSize: 14, fontFamily: fonts.bodySemi },
   guestsLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
-  guestsText: { color: colors.accent, fontSize: 14, fontWeight: "600" },
+  guestsText: { color: colors.accent, fontSize: 14, fontFamily: fonts.bodySemi },
   resetLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
-  resetText: { color: colors.muted, fontSize: 14, fontWeight: "600" },
+  resetText: { color: colors.muted, fontSize: 14, fontFamily: fonts.bodySemi },
 });

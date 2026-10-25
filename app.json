@@ -3,7 +3,7 @@
     "name": "Three Regions",
     "slug": "three-regions",
     "version": "0.1.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "jsEngine": "hermes",
     "ios": {
       "bundleIdentifier": "com.ngoc.threeregions",

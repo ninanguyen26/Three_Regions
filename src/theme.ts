@@ -1,4 +1,12 @@
 // Three Regions palette: warm dark kitchen tones (matches the scaffold).
+// Fonts: Caprasimo = display/headings (400 only), Cause = body text.
+// Names must match the @expo-google-fonts exports loaded in App.tsx.
+export const fonts = {
+  display: "Caprasimo_400Regular",
+  body: "Cause_400Regular",
+  bodySemi: "Cause_600SemiBold",
+  bodyBold: "Cause_700Bold",
+};
 export const colors = {
   bg: "#1d1710",
   panel: "#2a2118",

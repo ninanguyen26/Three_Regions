@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import { Caprasimo_400Regular } from "@expo-google-fonts/caprasimo";
+import {
+  Cause_400Regular,
+  Cause_600SemiBold,
+  Cause_700Bold,
+} from "@expo-google-fonts/cause";
 import { DISH_BY_ID, DISHES } from "./src/data/dishes";
 import { INGREDIENT_BY_ID } from "./src/data/ingredients";
 import {
@@ -80,6 +87,12 @@ export default function App() {
   const [marketReturn, setMarketReturn] = useState<"day" | "pick" | null>(
     null,
   );
+  const [fontsLoaded] = useFonts({
+    Caprasimo_400Regular,
+    Cause_400Regular,
+    Cause_600SemiBold,
+    Cause_700Bold,
+  });
 
   const beginWeek = (week: number, prev: SaveState | null): SaveState => {
     const base = prev ?? freshSave();
@@ -161,7 +174,7 @@ export default function App() {
     apply(fresh, "weekend");
   };
 
-  if (!save || screen === "loading") {
+  if (!fontsLoaded || !save || screen === "loading") {
     return (
       <SafeAreaView style={styles.loading}>
         <StatusBar style="light" />
