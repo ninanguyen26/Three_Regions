@@ -74,16 +74,38 @@ export default function RecipeBookScreen({
           </View>
           <Text style={styles.fieldLabel}>Recipe</Text>
           {approved ? (
-            selected.slots.map((s) => (
-              <Text key={s.ingredientId} style={styles.recipeRow}>
-                · {INGREDIENT_BY_ID[s.ingredientId]?.name ?? s.ingredientId}
-              </Text>
-            ))
+            selected.slots
+              .filter((s) => !s.optional)
+              .map((s) => (
+                <Text key={s.ingredientId} style={styles.recipeRow}>
+                  · {INGREDIENT_BY_ID[s.ingredientId]?.name ?? s.ingredientId}
+                </Text>
+              ))
           ) : (
-            selected.slots.map((s) => (
-              <View key={s.ingredientId} style={styles.emptySlot} />
-            ))
+            selected.slots
+              .filter((s) => !s.optional)
+              .map((s) => (
+                <View key={s.ingredientId} style={styles.emptySlot} />
+              ))
           )}
+          {selected.slots.some((s) => s.optional) ? (
+            <>
+              <Text style={styles.fieldLabel}>Finish (optional)</Text>
+              {approved ? (
+                selected.slots
+                  .filter((s) => s.optional)
+                  .map((s) => (
+                    <Text key={s.ingredientId} style={styles.recipeRow}>
+                      · {INGREDIENT_BY_ID[s.ingredientId]?.name ?? s.ingredientId}
+                    </Text>
+                  ))
+              ) : (
+                <Text style={styles.locked}>
+                  Optional finish, not required for approval.
+                </Text>
+              )}
+            </>
+          ) : null}
           <Field
             label="Prep note"
             revealed={best >= 80}

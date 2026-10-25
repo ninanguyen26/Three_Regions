@@ -113,6 +113,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
           "perilla-leaf",
           "vietnamese-coriander",
           "rice-paddy-herb",
+          "culantro",
         ],
       },
       {

@@ -72,6 +72,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "thai-basil",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "sweet-basil", similarity: 0.85 },
           { ingredientId: "mint", similarity: 0.6 },
@@ -80,12 +81,23 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "bean-sprouts",
         tier: "garnish",
+        optional: true,
         substitutes: [{ ingredientId: "shredded-cabbage", similarity: 0.55 }],
       },
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [{ ingredientId: "lemon", similarity: 0.8 }],
+      },
+      {
+        ingredientId: "culantro",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "cilantro", similarity: 0.7 },
+          { ingredientId: "parsley", similarity: 0.4 },
+        ],
       },
     ],
     history:
@@ -159,7 +171,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "mint",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "sweet-basil", similarity: 0.6 },
@@ -168,11 +181,12 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "garlic-chives",
         tier: "garnish",
+        optional: true,
         substitutes: [{ ingredientId: "green-onions", similarity: 0.55 }],
       },
     ],
     history:
-      "Gỏi cuốn is the South's fresh roll: shrimp and pork, vermicelli and herbs wrapped in softened rice paper and eaten uncooked, with a peanut and hoisin dip. Where the North fries its rolls (chả giò, nem rán), the South serves this one raw and cool.",
+      "Gỏi cuốn is the South's fresh roll: shrimp and pork, vermicelli and herbs wrapped in softened rice paper and eaten uncooked, with a peanut and hoisin dip.",
     funFact:
       "The shrimp is halved lengthwise and laid pink-side out so it shows through the translucent paper, and a single garlic chive sticks out of one end of the roll like a little green tail.",
   },
@@ -243,6 +257,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cilantro",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "mint", similarity: 0.5 },
           { ingredientId: "parsley", similarity: 0.4 },
@@ -251,6 +266,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [{ ingredientId: "jalapeno", similarity: 0.85 }],
       },
     ],
@@ -339,6 +355,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cucumber",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "tomato", similarity: 0.6 },
           { ingredientId: "zucchini", similarity: 0.35 },
@@ -417,6 +434,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "mint",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.55 },
@@ -425,6 +443,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.8 },
         ],
@@ -508,6 +527,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "mint",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.55 },
@@ -516,6 +536,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "fried-shallots",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shallot", similarity: 0.85 },
           { ingredientId: "yellow-onion", similarity: 0.5 },
@@ -601,6 +622,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.8 },
         ],
@@ -684,6 +706,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "bean-sprouts",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shredded-cabbage", similarity: 0.55 },
         ],
@@ -691,6 +714,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cilantro",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "parsley", similarity: 0.7 },
           { ingredientId: "mint", similarity: 0.55 },
@@ -758,6 +782,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cinnamon",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "ground-cinnamon", similarity: 0.9 },
           { ingredientId: "cassia-bark", similarity: 0.75 },
@@ -766,6 +791,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "vanilla-extract",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "vanilla-sugar", similarity: 0.85 },
           { ingredientId: "cinnamon", similarity: 0.4 },
@@ -850,6 +876,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.85 },
         ],
@@ -941,6 +968,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "pickled-carrot-daikon",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "carrots", similarity: 0.5 },
         ],
@@ -948,6 +976,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "fish-sauce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "regular-fish-sauce", similarity: 0.92 },
           { ingredientId: "soy-sauce", similarity: 0.45 },
@@ -1017,6 +1046,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "eggs",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "liquid-egg", similarity: 0.9 },
         ],
@@ -1024,6 +1054,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "shallot",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "yellow-onion", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.6 },
@@ -1109,6 +1140,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "banana-blossom",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shredded-cabbage", similarity: 0.75 },
           { ingredientId: "bean-sprouts", similarity: 0.6 },
@@ -1117,6 +1149,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.9 },
         ],
@@ -1197,16 +1230,9 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "vietnamese-coriander",
-        tier: "garnish",
-        substitutes: [
-          { ingredientId: "cilantro", similarity: 0.7 },
-          { ingredientId: "mint", similarity: 0.6 },
-        ],
-      },
-      {
         ingredientId: "shallot",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "yellow-onion", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.6 },
@@ -1276,6 +1302,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-leaf-lettuce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
           { ingredientId: "shredded-cabbage", similarity: 0.6 },
@@ -1284,6 +1311,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "mint",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.65 },
@@ -1292,6 +1320,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.9 },
         ],
@@ -1360,6 +1389,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "fried-shallots",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shallot", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.4 },
@@ -1368,6 +1398,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.75 },
         ],
@@ -1375,6 +1406,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.9 },
         ],
@@ -1451,6 +1483,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-leaf-lettuce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
           { ingredientId: "shredded-cabbage", similarity: 0.6 },
@@ -1459,6 +1492,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "mint",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.7 },
@@ -1467,6 +1501,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cucumber",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "zucchini", similarity: 0.6 },
           { ingredientId: "carrots", similarity: 0.5 },
@@ -1550,6 +1585,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lime",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.9 },
         ],
@@ -1633,6 +1669,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-leaf-lettuce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
           { ingredientId: "shredded-cabbage", similarity: 0.55 },
@@ -1641,6 +1678,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "bean-sprouts",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shredded-cabbage", similarity: 0.5 },
         ],
@@ -1723,6 +1761,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-leaf-lettuce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
         ],
@@ -1730,6 +1769,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "fish-sauce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "regular-fish-sauce", similarity: 0.92 },
           { ingredientId: "soy-sauce", similarity: 0.45 },
@@ -1813,6 +1853,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.85 },
         ],
@@ -1822,7 +1863,8 @@ export const DISHES: Dish[] = [
         tier: "garnish",
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.6 },
-          { ingredientId: "mint", similarity: 0.55 },
+          { ingredientId: "culantro", similarity: 0.7 },
+          { ingredientId: "mint", similarity: 0.35 },
         ],
       },
     ],
@@ -1904,6 +1946,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-onions",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "garlic-chives", similarity: 0.7 },
         ],
@@ -1911,6 +1954,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.85 },
         ],
@@ -2001,6 +2045,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-leaf-lettuce",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
         ],
@@ -2082,16 +2127,9 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-onions",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "garlic-chives", similarity: 0.7 },
-        ],
-      },
-      {
-        ingredientId: "pickled-mustard-greens",
-        tier: "garnish",
-        substitutes: [
-          { ingredientId: "pickled-carrot-daikon", similarity: 0.6 },
-          { ingredientId: "dill-pickles", similarity: 0.5 },
         ],
       },
     ],
@@ -2182,6 +2220,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "thai-basil",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "sweet-basil", similarity: 0.85 },
           { ingredientId: "mint", similarity: 0.6 },
@@ -2263,6 +2302,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "cilantro",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "parsley", similarity: 0.5 },
           { ingredientId: "mint", similarity: 0.45 },
@@ -2271,6 +2311,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "red-chili",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.85 },
         ],
@@ -2353,9 +2394,10 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "green-onions",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "garlic-chives", similarity: 0.7 },
-          { ingredientId: "cilantro", similarity: 0.4 },
+          { ingredientId: "cilantro", similarity: 1 },
         ],
       },
     ],
@@ -2409,6 +2451,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "lotus-seeds",
         tier: "support",
+        optional: true,
         substitutes: [
           { ingredientId: "roasted-peanuts", similarity: 0.5 },
         ],
@@ -2423,16 +2466,9 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "roasted-peanuts",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "peanut-butter", similarity: 0.75 },
-        ],
-      },
-      {
-        ingredientId: "mint",
-        tier: "garnish",
-        substitutes: [
-          { ingredientId: "thai-basil", similarity: 0.6 },
-          { ingredientId: "cilantro", similarity: 0.5 },
         ],
       },
     ],

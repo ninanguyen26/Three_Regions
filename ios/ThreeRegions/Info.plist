@@ -27,7 +27,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.ngoc.threeregions</string>
+				<string>com.apphibian-llc.threeregions.dev</string>
 			</array>
 		</dict>
 		<dict>

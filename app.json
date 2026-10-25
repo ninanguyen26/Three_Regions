@@ -6,7 +6,7 @@
     "orientation": "landscape",
     "jsEngine": "hermes",
     "ios": {
-      "bundleIdentifier": "com.ngoc.threeregions",
+      "bundleIdentifier": "com.apphibian-llc.threeregions.dev",
       "supportsTablet": true,
       "appleTeamId": "9965C7BUB7"
     },

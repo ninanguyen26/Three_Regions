@@ -159,6 +159,7 @@ export const INGREDIENTS: IngredientDef[] = [
   { id: "perilla-leaf", name: "Perilla leaf", category: "herb" },
   { id: "vietnamese-coriander", name: "Vietnamese coriander (rau răm)", category: "herb" },
   { id: "rice-paddy-herb", name: "Rice paddy herb (ngò ôm)", category: "herb" },
+  { id: "culantro", name: "Culantro (ngò gai)", category: "herb" },
   // garnish
   { id: "bean-sprouts", name: "Bean sprouts", category: "garnish" },
   { id: "shredded-cabbage", name: "Shredded cabbage", category: "garnish" },

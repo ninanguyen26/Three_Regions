@@ -36,6 +36,7 @@ export type Medal = "gold" | "silver" | "stamped" | "fail";
 export interface SlotResult {
   ingredientId: string;
   tier: Tier;
+  optional: boolean;
   /** The basket pick that scored this slot (the best family match). */
   pickedId: string | null;
   similarity: number;
@@ -94,6 +95,7 @@ export function scoreDish(
       return {
         ingredientId: slot.ingredientId,
         tier: slot.tier,
+        optional: slot.optional === true,
         pickedId,
         similarity,
         weight: TIER_WEIGHTS[slot.tier],
@@ -118,11 +120,15 @@ export function scoreDish(
   const wrongPicks = uniqueBasket.filter((id) => !menuUsed.has(id));
   const wrongPickPenalty = wrongPicks.length * WRONG_PICK_PENALTY;
 
-  const totalWeight = slots.reduce((a, s) => a + s.weight, 0);
-  const earned = slots.reduce((a, s) => a + s.weight * s.similarity, 0);
+  // Optional (finish) slots are excluded from the medal score entirely:
+  // missing 0, present 0. Their picks still count as used above, so they
+  // never ding as wrong picks.
+  const scoredSlots = slots.filter((s) => !s.optional);
+  const totalWeight = scoredSlots.reduce((a, s) => a + s.weight, 0);
+  const earned = scoredSlots.reduce((a, s) => a + s.weight * s.similarity, 0);
   const rawPercent = totalWeight === 0 ? 0 : (earned / totalWeight) * 100;
 
-  const capped = slots.some((s) => s.tier === "signature" && s.similarity === 0);
+  const capped = scoredSlots.some((s) => s.tier === "signature" && s.similarity === 0);
 
   let percent =
     rawPercent - wrongPickPenalty - (1 - execution) * MAX_EXECUTION_PENALTY;
@@ -131,7 +137,7 @@ export function scoreDish(
 
   let biggestMiss: SlotResult | null = null;
   let worstLoss = 0;
-  for (const s of slots) {
+  for (const s of scoredSlots) {
     const loss = s.weight * (1 - s.similarity);
     if (loss > worstLoss) {
       worstLoss = loss;

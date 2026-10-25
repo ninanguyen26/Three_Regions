@@ -43,6 +43,8 @@ export interface DishSlot {
   /** The correct ingredient for this slot. */
   ingredientId: string;
   tier: Tier;
+  /** Finish-only slot: excluded from the medal score, never a wrong pick. */
+  optional?: boolean;
   /** Plausible wrong picks the market offers for this slot. */
   substitutes: Substitute[];
 }
