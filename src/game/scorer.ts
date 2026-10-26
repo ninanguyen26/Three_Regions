@@ -1,13 +1,15 @@
 // Three Regions: the medal scorer. Pure function, no UI, no I/O.
 //
-// The basket model (Ngoc, 2026-10-23): the player picks freely, up to the
-// dish's cap (= its slot count). Each slot scores its BEST-matching pick in
-// the basket (exact 1.0, substitute = its similarity, nothing = 0), weighted
-// by tier (signature 3 / core 2 / support 1 / garnish 0.5). Picks that no
-// slot uses (the family's loser, a foreign ingredient) are WRONG PICKS and
-// each dings the score. A slot left with no family member at all still caps
-// the dish when it's a signature slot. Minus a small execution penalty.
-// Thresholds decided by Ngoc: stamp >= 80, silver >= 90, gold >= 95.
+// The basket model (Ngoc, 2026-10-23; consumption fix 2026-10-25): the
+// player picks freely, up to the dish's cap (= its slot count). Each basket
+// pick is used ONCE, by one slot only. Slots are filled scored-first, then
+// optional, highest similarity first: an exact match (1.0) beats a
+// substitute match, so a tomato pick fills the tomato slot, not the
+// pineapple slot that lists tomato as a 0.5 substitute. Picks that no slot
+// uses are WRONG PICKS and each dings the score. A slot left with no pick
+// at all still caps the dish when it's a signature slot. Minus a small
+// execution penalty. Thresholds decided by Ngoc: stamp >= 80, silver >= 90,
+// gold >= 95.
 //
 // Menu play: when the week's basket serves a whole menu, scoreDish takes
 // the menu as a 4th argument and wrong picks are judged against every dish
@@ -73,31 +75,56 @@ export function scoreDish(
   menu?: Dish[],
 ): ScoreResult {
   const uniqueBasket = [...new Set(basket)];
-  const inBasket = new Set(uniqueBasket);
 
   const matchSlots = (d: Dish): { slots: SlotResult[]; used: Set<string> } => {
-    const used = new Set<string>();
-    const slots: SlotResult[] = d.slots.map((slot) => {
-      let pickedId: string | null = null;
-      let similarity = 0;
-      if (inBasket.has(slot.ingredientId)) {
-        pickedId = slot.ingredientId;
-        similarity = 1;
-      } else {
-        for (const sub of slot.substitutes) {
-          if (inBasket.has(sub.ingredientId) && sub.similarity > similarity) {
-            pickedId = sub.ingredientId;
-            similarity = sub.similarity;
+    // Candidate matches: every (slot, pick) pair with a similarity > 0.
+    // Sorted scored-first, then optional, highest similarity first, then
+    // dish order, so each pick goes to its strongest scored slot first.
+    type Candidate = {
+      slotIndex: number;
+      pick: string;
+      similarity: number;
+      optional: boolean;
+    };
+    const candidates: Candidate[] = [];
+    d.slots.forEach((slot, slotIndex) => {
+      const optional = slot.optional === true;
+      for (const pick of uniqueBasket) {
+        let similarity = 0;
+        if (pick === slot.ingredientId) {
+          similarity = 1;
+        } else {
+          for (const sub of slot.substitutes) {
+            if (sub.ingredientId === pick && sub.similarity > similarity) {
+              similarity = sub.similarity;
+            }
           }
         }
+        if (similarity > 0) {
+          candidates.push({ slotIndex, pick, similarity, optional });
+        }
       }
-      if (pickedId != null) used.add(pickedId);
+    });
+    candidates.sort((a, b) => {
+      if (a.optional !== b.optional) return a.optional ? 1 : -1;
+      if (b.similarity !== a.similarity) return b.similarity - a.similarity;
+      return a.slotIndex - b.slotIndex;
+    });
+    const used = new Set<string>();
+    const filled = new Map<number, Candidate>();
+    for (const c of candidates) {
+      if (filled.has(c.slotIndex) || used.has(c.pick)) continue;
+      filled.set(c.slotIndex, c);
+      used.add(c.pick);
+    }
+    const slots: SlotResult[] = d.slots.map((slot, slotIndex) => {
+      const c = filled.get(slotIndex);
       return {
         ingredientId: slot.ingredientId,
         tier: slot.tier,
         optional: slot.optional === true,
-        pickedId,
-        similarity,
+        pickedId: c ? c.pick : null,
+        similarity: c ? c.similarity : 0,
         weight: TIER_WEIGHTS[slot.tier],
       };
     });

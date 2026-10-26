@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import type { Dish } from "../data/types";
 import { colors } from "../theme";
@@ -77,10 +78,10 @@ const styles = StyleSheet.create({
   chipText: { color: colors.text, fontSize: 13 },
   cta: {
     marginTop: 26,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
 });

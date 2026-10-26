@@ -211,7 +211,7 @@ export const DISHES: Dish[] = [
         ingredientId: "pate-pork",
         tier: "signature",
         substitutes: [
-          { ingredientId: "pate-chicken", similarity: 0.85 },
+          { ingredientId: "pate-chicken", similarity: 0.95 },
           { ingredientId: "liverwurst", similarity: 0.6 },
         ],
       },
@@ -231,10 +231,10 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "mayonnaise",
+        ingredientId: "kewpie-mayo",
         tier: "support",
         substitutes: [
-          { ingredientId: "kewpie-mayo", similarity: 0.95 },
+          { ingredientId: "mayonnaise", similarity: 0.95 },
           { ingredientId: "butter", similarity: 0.5 },
         ],
       },
@@ -273,7 +273,7 @@ export const DISHES: Dish[] = [
     history:
       "The French brought the baguette to Vietnam in the mid-1800s, and Vietnamese bakers answered with a lighter loaf: crackling crust, airy middle, rice flour often in the mix. The filled sandwich took shape in 1950s Saigon, pâté and mayonnaise meeting chả lụa, pickled carrot and daikon, cilantro and chili.",
     funFact:
-      "Bánh mì is simply the word for bread. The sandwich inherited the loaf's name, and classic Saigon shops finish it with a dash of Maggi seasoning.",
+      "Bánh mì is simply the word for bread. In Saigon's heat a baguette goes stale fast, so many shops baked twice a day to keep the crust shattering.",
   },
   {
     id: "com-tam-suon",
@@ -281,7 +281,7 @@ export const DISHES: Dish[] = [
     group: "starter",
     region: "south",
     verb: "sear",
-    clue: "The broken-rice one: a lemongrass pork chop off the charcoal, pork skin and egg cake, scallion oil over all of it.",
+    clue: "The broken-rice one: a lemongrass pork chop off the charcoal, scallion oil over all of it.",
     prepNote: "Pork chops marinating in lemongrass, bì tossed with its rice powder, egg cake steamed and sliced.",
     slots: [
       {
@@ -315,27 +315,6 @@ export const DISHES: Dish[] = [
           { ingredientId: "regular-fish-sauce", similarity: 0.92 },
           { ingredientId: "soy-sauce", similarity: 0.45 },
         ],
-      },
-      {
-        ingredientId: "pork-skin",
-        tier: "core",
-        substitutes: [
-          { ingredientId: "toasted-rice-powder", similarity: 0.5 },
-          { ingredientId: "pork-rinds", similarity: 0.45 },
-        ],
-      },
-      {
-        ingredientId: "ground-pork",
-        tier: "support",
-        substitutes: [
-          { ingredientId: "chicken", similarity: 0.45 },
-          { ingredientId: "tofu", similarity: 0.3 },
-        ],
-      },
-      {
-        ingredientId: "eggs",
-        tier: "support",
-        substitutes: [{ ingredientId: "liquid-egg", similarity: 0.6 }],
       },
       {
         ingredientId: "green-onions",
@@ -448,6 +427,21 @@ export const DISHES: Dish[] = [
           { ingredientId: "lemon", similarity: 0.8 },
         ],
       },
+      {
+        ingredientId: "green-leaf-lettuce",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "romaine", similarity: 0.9 },
+          { ingredientId: "shredded-cabbage", similarity: 0.5 },
+        ],
+      },
+      {
+        ingredientId: "bean-sprouts",
+        tier: "garnish",
+        optional: true,
+        substitutes: [],
+      },
     ],
     history: "Bun cha grew up as a Hanoi lunch, built around charcoal grilling and a separate warm dipping broth rather than a single bowl of soup. Writers were already describing Hanoi as a city absorbed by the dish by 1959, and its first dedicated restaurant stood in the Old Quarter. It stayed a northern specialty even as a similar grilled meat and noodle plate developed in the south.",
     funFact: "The dish famously reached a worldwide audience in 2016, when it was eaten at a small Hanoi table by Barack Obama and Anthony Bourdain. It is traditionally a midday meal, when street grills fill whole lanes with smoke.",
@@ -502,23 +496,17 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "cha-lua",
-        tier: "support",
-        substitutes: [
-          { ingredientId: "ham", similarity: 0.7 },
-          { ingredientId: "bologna", similarity: 0.45 },
-        ],
-      },
-      {
         ingredientId: "bean-sprouts",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shredded-cabbage", similarity: 0.55 },
         ],
       },
       {
         ingredientId: "cucumber",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "dill-pickles", similarity: 0.5 },
           { ingredientId: "zucchini", similarity: 0.35 },
@@ -720,6 +708,31 @@ export const DISHES: Dish[] = [
           { ingredientId: "mint", similarity: 0.55 },
         ],
       },
+      {
+        ingredientId: "perilla-leaf",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "mint", similarity: 0.6 },
+          { ingredientId: "thai-basil", similarity: 0.5 },
+        ],
+      },
+      {
+        ingredientId: "banana-blossom",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "shredded-cabbage", similarity: 0.6 },
+        ],
+      },
+      {
+        ingredientId: "lime",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "lemon", similarity: 0.8 },
+        ],
+      },
     ],
     history: "Bun rieu began in the north, where cooks ground small freshwater crabs, strained the shells, and simmered the liquid until the crab protein rose into soft, foamy clusters. That floating layer gives the dish its name and its soul. As it traveled south, the bowl grew more crowded, but the northern version stays closer to crab, tomato, and a lightly sour broth.",
     funFact: "The word for the crab clusters can be read as sea foam, a nod to how they puff up in the pot. Modern cooks often use canned crab paste instead of grinding crabs by hand, which keeps the dish practical outside Vietnam.",
@@ -852,7 +865,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "cucumber",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "dill-pickles", similarity: 0.5 },
           { ingredientId: "zucchini", similarity: 0.35 },
@@ -860,7 +874,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "mint",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.55 },
@@ -884,6 +899,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "shallot",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "yellow-onion", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.6 },
@@ -951,7 +967,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "green-leaf-lettuce",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "romaine", similarity: 0.9 },
           { ingredientId: "shredded-cabbage", similarity: 0.5 },
@@ -959,7 +976,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "mint",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.75 },
           { ingredientId: "cilantro", similarity: 0.55 },
@@ -1028,27 +1046,11 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "coconut-milk",
-        tier: "support",
-        substitutes: [
-          { ingredientId: "whole-milk", similarity: 0.55 },
-          { ingredientId: "butter", similarity: 0.4 },
-        ],
-      },
-      {
         ingredientId: "chicken-fat",
         tier: "support",
         substitutes: [
           { ingredientId: "butter", similarity: 0.7 },
           { ingredientId: "chicken", similarity: 0.55 },
-        ],
-      },
-      {
-        ingredientId: "eggs",
-        tier: "garnish",
-        optional: true,
-        substitutes: [
-          { ingredientId: "liquid-egg", similarity: 0.9 },
         ],
       },
       {
@@ -1062,7 +1064,7 @@ export const DISHES: Dish[] = [
       },
     ],
     history: "Xoi xeo is a Hanoi breakfast, sold from baskets and street corners early in the morning to students and workers who want something cheap and filling. The rice is soaked with turmeric until it turns yellow, then steamed, while mung beans are steamed, pounded, and pressed into balls. At serving time the seller slices those balls thinly over the rice by hand, which is the skill the dish is named for.",
-    funFact: "The finished plate is a study in texture, with soft rice, melting bean, and crunchy shallots in one bite. Vendors traditionally finish it with a spoon of rendered fat, while home cooks often use coconut milk instead for a lighter, richer rice.",
+    funFact: "Beyond the rice, bean, and shallots, vendors top xôi xéo with extras like shrimp floss and sliced pork sausage, so no two plates are quite the same.",
   },
   {
     id: "bun-bo-hue",
@@ -1131,7 +1133,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "chili-oil",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "red-chili", similarity: 0.7 },
           { ingredientId: "jalapeno", similarity: 0.4 },
@@ -1152,6 +1155,24 @@ export const DISHES: Dish[] = [
         optional: true,
         substitutes: [
           { ingredientId: "lemon", similarity: 0.9 },
+        ],
+      },
+      {
+        ingredientId: "mint",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "thai-basil", similarity: 0.75 },
+          { ingredientId: "cilantro", similarity: 0.55 },
+        ],
+      },
+      {
+        ingredientId: "vietnamese-coriander",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "cilantro", similarity: 0.7 },
+          { ingredientId: "mint", similarity: 0.6 },
         ],
       },
     ],
@@ -1216,17 +1237,11 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "roasted-peanuts",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "peanut-butter", similarity: 0.75 },
           { ingredientId: "toasted-rice-powder", similarity: 0.4 },
-        ],
-      },
-      {
-        ingredientId: "eggs",
-        tier: "support",
-        substitutes: [
-          { ingredientId: "liquid-egg", similarity: 0.95 },
         ],
       },
       {
@@ -1236,6 +1251,51 @@ export const DISHES: Dish[] = [
         substitutes: [
           { ingredientId: "yellow-onion", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.6 },
+        ],
+      },
+      {
+        ingredientId: "quail-eggs",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "eggs", similarity: 0.85 },
+          { ingredientId: "liquid-egg", similarity: 0.4 },
+        ],
+      },
+      {
+        ingredientId: "cilantro",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "parsley", similarity: 0.7 },
+          { ingredientId: "mint", similarity: 0.55 },
+        ],
+      },
+      {
+        ingredientId: "banana-blossom",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "shredded-cabbage", similarity: 0.75 },
+          { ingredientId: "bean-sprouts", similarity: 0.6 },
+        ],
+      },
+      {
+        ingredientId: "mint",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "thai-basil", similarity: 0.75 },
+          { ingredientId: "cilantro", similarity: 0.55 },
+        ],
+      },
+      {
+        ingredientId: "perilla-leaf",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "mint", similarity: 0.7 },
+          { ingredientId: "thai-basil", similarity: 0.6 },
         ],
       },
     ],
@@ -1380,7 +1440,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "green-onions",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "garlic-chives", similarity: 0.85 },
           { ingredientId: "shallot", similarity: 0.5 },
@@ -1401,14 +1462,6 @@ export const DISHES: Dish[] = [
         optional: true,
         substitutes: [
           { ingredientId: "jalapeno", similarity: 0.75 },
-        ],
-      },
-      {
-        ingredientId: "lime",
-        tier: "garnish",
-        optional: true,
-        substitutes: [
-          { ingredientId: "lemon", similarity: 0.9 },
         ],
       },
     ],
@@ -1458,11 +1511,11 @@ export const DISHES: Dish[] = [
         ],
       },
       {
-        ingredientId: "glass-noodles",
+        ingredientId: "round-rice-noodle",
         tier: "support",
         substitutes: [
-          { ingredientId: "dried-rice-noodle", similarity: 0.8 },
-          { ingredientId: "round-rice-noodle", similarity: 0.75 },
+          { ingredientId: "dried-rice-noodle", similarity: 0.9 },
+          { ingredientId: "glass-noodles", similarity: 0.5 },
         ],
       },
       {
@@ -1569,7 +1622,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "fried-shallots",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "shallot", similarity: 0.85 },
           { ingredientId: "green-onions", similarity: 0.4 },
@@ -1577,7 +1631,8 @@ export const DISHES: Dish[] = [
       },
       {
         ingredientId: "pickled-carrot-daikon",
-        tier: "support",
+        tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "carrots", similarity: 0.65 },
         ],
@@ -1615,8 +1670,9 @@ export const DISHES: Dish[] = [
         ingredientId: "pork-bones",
         tier: "signature",
         substitutes: [
+          { ingredientId: "pork-knuckle", similarity: 0.9 },
           { ingredientId: "pork-shoulder", similarity: 0.7 },
-          { ingredientId: "chicken", similarity: 0.45 },
+          { ingredientId: "chicken", similarity: 0.6 },
         ],
       },
       {
@@ -1681,6 +1737,15 @@ export const DISHES: Dish[] = [
         optional: true,
         substitutes: [
           { ingredientId: "shredded-cabbage", similarity: 0.5 },
+        ],
+      },
+      {
+        ingredientId: "green-onions",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "garlic-chives", similarity: 0.7 },
+          { ingredientId: "shallot", similarity: 0.5 },
         ],
       },
     ],
@@ -1775,6 +1840,14 @@ export const DISHES: Dish[] = [
           { ingredientId: "soy-sauce", similarity: 0.45 },
         ],
       },
+      {
+        ingredientId: "pickled-carrot-daikon",
+        tier: "garnish",
+        optional: true,
+        substitutes: [
+          { ingredientId: "carrots", similarity: 0.5 },
+        ],
+      },
     ],
     history: "Banh xeo began in Central Vietnam as a rice flour crepe, and the southern version grew bigger, thinner and richer with coconut milk in the batter. Its name copies the loud sizzle the batter makes when it is ladled into a ripping hot pan.",
     funFact: "In the South the crepe is cut up and eaten wrapped in lettuce and herbs, so one fried pancake is eaten like a fresh salad roll.",
@@ -1861,6 +1934,7 @@ export const DISHES: Dish[] = [
       {
         ingredientId: "rice-paddy-herb",
         tier: "garnish",
+        optional: true,
         substitutes: [
           { ingredientId: "thai-basil", similarity: 0.6 },
           { ingredientId: "culantro", similarity: 0.7 },

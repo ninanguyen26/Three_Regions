@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
+import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import type { DayResult } from "../game/save";
 import { colors } from "../theme";
@@ -72,10 +73,10 @@ const styles = StyleSheet.create({
   body: { color: colors.text, fontSize: 15, lineHeight: 22 },
   cta: {
     marginTop: 26,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
 });

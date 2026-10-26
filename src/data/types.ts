@@ -65,6 +65,15 @@ export interface Dish {
   funFact: string;
 }
 
+export interface SideDish {
+  id: string;
+  name: string;
+  /** The single ingredient served as the side. */
+  ingredientId: string;
+  /** Main dishes this side pairs with, as dish ids. */
+  mainDishIds: string[];
+}
+
 export interface Regular {
   id: string;
   /** Display name. The reviewer stays nameless by design (incognito). */

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import { colors } from "../theme";
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   guideCard: {
     marginTop: 14,
     backgroundColor: colors.panel,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
     borderWidth: 1,
     borderRadius: 14,
     padding: 16,
@@ -144,12 +145,12 @@ const styles = StyleSheet.create({
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   empty: { color: colors.muted, fontSize: 14 },
   pickChip: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.secondary,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  pickChipText: { color: "#241a0e", fontSize: 13, fontWeight: "700" },
+  pickChipText: { color: colors.onSecondary, fontSize: 13, fontWeight: "700" },
   chip: {
     backgroundColor: colors.panel,
     borderColor: colors.panelEdge,
@@ -158,17 +159,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  chipSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
+  chipSelected: { backgroundColor: colors.secondary, borderColor: colors.secondary },
   chipText: { color: colors.text, fontSize: 13 },
-  chipTextSelected: { color: "#241a0e", fontWeight: "700" },
+  chipTextSelected: { color: colors.onSecondary, fontWeight: "700" },
   cta: {
     marginTop: 22,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
   marketWrap: { alignItems: "center", marginTop: 14 },
   market: { color: colors.accent, fontSize: 14, fontWeight: "600" },
 });

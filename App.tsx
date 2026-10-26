@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, Text } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { SafeAreaView, StyleSheet, useWindowDimensions, View, type ImageSourcePropType } from "react-native";
+import Text from "./src/components/AppText";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Caprasimo_400Regular } from "@expo-google-fonts/caprasimo";
@@ -10,6 +11,7 @@ import {
 } from "@expo-google-fonts/cause";
 import { DISH_BY_ID, DISHES } from "./src/data/dishes";
 import { INGREDIENT_BY_ID } from "./src/data/ingredients";
+import type { MarketSection } from "./src/data/markets";
 import {
   CATEGORY_LABEL,
   groupFixFor,
@@ -39,6 +41,11 @@ import {
   type SaveState,
 } from "./src/game/save";
 import HomeScreen from "./src/screens/HomeScreen";
+import TitleScreen from "./src/screens/TitleScreen";
+import HomeButton from "./src/components/HomeButton";
+import SceneLoading from "./src/components/SceneLoading";
+import { prepareImages } from "./src/rendering/prepareImages";
+import { HOME_ASSETS, marketSceneAssets } from "./src/rendering/sceneAssets";
 import MarketScreen from "./src/screens/MarketScreen";
 import CookScreen from "./src/screens/CookScreen";
 import WrapCook from "./src/screens/WrapCook";
@@ -59,9 +66,7 @@ type Screen =
   | "pick"
   | "cook"
   | "result"
-  | "close"
-  | "recipeBook"
-  | "guests";
+  | "close";
 
 // Three Regions, the week loop:
 // weekend (forecast) -> Saturday market -> Sunday prep -> Sunday trial
@@ -72,8 +77,42 @@ type Screen =
 // -> Friday close -> next week. The whole loop state persists in
 // AsyncStorage.
 export default function App() {
-  const [save, setSave] = useState<SaveState | null>(null);
+  const [storedSave, setSave] = useState<SaveState | null>(null);
+  const basketRef = useRef<string[] | null>(null);
+  const save = storedSave ? { ...storedSave, basket: basketRef.current } : null;
+  const latestSave = useRef<SaveState | null>(null);
+  latestSave.current = save;
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const [preparing, setPreparing] = useState(false);
+  const navigationLock = useRef(false);
+  const prepareNavigation = useCallback(async (sources: ImageSourcePropType[], enter: () => void) => {
+    if (navigationLock.current) return;
+    navigationLock.current = true;
+    setPreparing(true);
+    try {
+      await prepareImages(sources);
+    } catch {
+      // An image failure must not block navigation; the mounted scene has its own fallback.
+    } finally {
+      navigationLock.current = false;
+      setPreparing(false);
+      enter();
+    }
+  }, []);
+  const updateBasket = useCallback((basket: string[]) => {
+    const current = latestSave.current;
+    if (!current) return;
+    const next = { ...current, basket };
+    basketRef.current = basket;
+    latestSave.current = next;
+    // Selection updates remain local to MarketScreen; persistence needs no root render.
+    void storeSave(next);
+  }, []);
   const [screen, setScreen] = useState<Screen>("loading");
+  const [showTitle, setShowTitle] = useState(true);
+  const [homeVisible, setHomeVisible] = useState(false);
+  const [auxScreen, setAuxScreen] = useState<"recipeBook" | "guests" | "market" | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<MarketSection | null>(null);
   // The pick screen's entry: which kind of pick, and what it starts from.
   // Service and first-trial picks start empty; repair and re-trial picks
   // start from the failed pick. Transient: a reload resumes from the save
@@ -123,6 +162,7 @@ export default function App() {
     (async () => {
       const loaded = await loadSave();
       if (loaded) {
+        basketRef.current = loaded.basket;
         setSave(loaded);
         if (loaded.phase === "trial" && loaded.trialStep === "repair") {
           setPickEntry({ mode: "repair", initial: loaded.pick ?? [] });
@@ -154,6 +194,7 @@ export default function App() {
         }
       } else {
         const fresh = beginWeek(1, null);
+        basketRef.current = fresh.basket;
         setSave(fresh);
         await storeSave(fresh);
         setScreen("weekend");
@@ -163,23 +204,46 @@ export default function App() {
   }, []);
 
   const apply = (next: SaveState, to: Screen) => {
+    basketRef.current = next.basket;
+    latestSave.current = next;
     setSave(next);
     void storeSave(next);
     setScreen(to);
   };
 
+  const goHome = () => {
+    void prepareNavigation(HOME_ASSETS, () => {
+      setAuxScreen(null);
+      setHomeVisible(true);
+    });
+  };
+
   const reset = async () => {
     await clearSave();
     const fresh = beginWeek(1, null);
+    setHomeVisible(false);
+    setAuxScreen(null);
     apply(fresh, "weekend");
   };
 
   if (!fontsLoaded || !save || screen === "loading") {
     return (
       <SafeAreaView style={styles.loading}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <Text style={styles.loadingText}>Three Regions…</Text>
       </SafeAreaView>
+    );
+  }
+
+  if (showTitle) {
+    return (
+      <View style={{ flex: 1 }}>
+        <StatusBar style="dark" />
+        <TitleScreen onPlay={() => {
+          void prepareNavigation(screen === "weekend" ? HOME_ASSETS : [], () => setShowTitle(false));
+        }} />
+        <SceneLoading visible={preparing} />
+      </View>
     );
   }
 
@@ -338,279 +402,343 @@ export default function App() {
     }
   };
 
+  const currentBasket = save.basket ?? [];
+  const openPreparedMarket = (market: MarketSection | undefined, enter: () => void) => {
+    void prepareNavigation(marketSceneAssets(market, basketRef.current ?? [], windowWidth, windowHeight), enter);
+  };
+  const hubVisible = (homeVisible || screen === "weekend") && auxScreen === null;
+  const gameVisible = !homeVisible && screen !== "weekend" && auxScreen === null;
+  // MarketScreen owns its safe areas so each surface can extend to the screen edges.
+  const AuxiliaryContainer = auxScreen === "market" ? View : SafeAreaView;
+  const GameContainer = screen === "market" ? View : SafeAreaView;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <StatusBar style="light" />
-      {screen === "weekend" && (
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <StatusBar style="dark" />
+      {hubVisible && (
         <HomeScreen
           week={save.week}
           notes={save.notes}
           pool={pool}
+          shoppingDishes={shoppingDishes}
           savings={save.savings}
-          onStart={() => apply({ ...save, phase: "market" }, "market")}
-          onRecipeBook={() => setScreen("recipeBook")}
-          onGuests={() => setScreen("guests")}
+          startLabel={screen !== "weekend" ? "Continue →" : undefined}
+          onStart={() => {
+            if (screen === "weekend") {
+              openPreparedMarket(undefined, () => {
+                setHomeVisible(false);
+                apply({ ...save, basket: basketRef.current, phase: "market" }, "market");
+              });
+            } else {
+              setHomeVisible(false);
+            }
+          }}
+          onMarket={(market) => {
+            openPreparedMarket(market, () => {
+              setSelectedMarket(market);
+              setAuxScreen("market");
+            });
+          }}
+          onRecipeBook={() => setAuxScreen("recipeBook")}
+          onGuests={() => setAuxScreen("guests")}
           onReset={reset}
         />
       )}
-      {screen === "recipeBook" && (
-        <RecipeBookScreen
-          bestByDish={save.bestByDish ?? {}}
-          menuIds={save.menuIds}
-          onBack={() => setScreen("weekend")}
-        />
+      {auxScreen !== null && (
+        <AuxiliaryContainer style={styles.gameArea}>
+          {auxScreen !== "market" && <HomeButton onPress={goHome} />}
+          {auxScreen === "recipeBook" && (
+            <RecipeBookScreen
+              bestByDish={save.bestByDish ?? {}}
+              menuIds={save.menuIds}
+              onBack={() => setAuxScreen(null)}
+            />
+          )}
+          {auxScreen === "guests" && (
+            <GuestsScreen
+              servesByRegular={save.servesByRegular ?? {}}
+              week={save.week}
+              onBack={() => setAuxScreen(null)}
+            />
+          )}
+          {auxScreen === "market" && selectedMarket && (
+            <MarketScreen
+              onHome={goHome}
+              market={selectedMarket}
+              basket={currentBasket}
+              onBasketChange={updateBasket}
+              ctaLabel="Done →"
+              onBack={goHome}
+              onDone={(basket) => {
+                apply({ ...save, basket }, screen);
+                goHome();
+              }}
+            />
+          )}
+        </AuxiliaryContainer>
       )}
-      {screen === "guests" && (
-        <GuestsScreen
-          servesByRegular={save.servesByRegular ?? {}}
-          week={save.week}
-          onBack={() => setScreen("weekend")}
-        />
-      )}
-      {screen === "market" && (
-        <MarketScreen
-          dishes={marketReturn != null ? pool : shoppingDishes}
-          initialBasket={save.basket ?? []}
-          ctaLabel={marketReturn != null ? "Done →" : undefined}
-          backLabel={marketReturn != null ? "← Back" : undefined}
-          onBack={() => {
-            if (marketReturn != null) {
-              const to = marketReturn === "pick" ? "pick" : "day";
-              setMarketReturn(null);
-              setScreen(to);
-            } else {
-              apply({ ...save, phase: "weekend" }, "weekend");
-            }
-          }}
-          onDone={(basket) => {
-            if (marketReturn != null) {
-              const to = marketReturn === "pick" ? "pick" : "day";
-              setMarketReturn(null);
-              apply({ ...save, basket }, to);
-            } else {
-              apply({ ...save, basket, phase: "prep" }, "prep");
-            }
-          }}
-        />
-      )}
-      {screen === "prep" && (
-        <PrepScreen
-          dishes={pool}
-          basket={save.basket ?? []}
-          trialDish={trialDish}
-          onStart={() => {
-            if (trialDish) {
-              setPickEntry({ mode: "trial", initial: [] });
-              apply(
-                { ...save, trialStep: "pick", phase: "trial" },
-                "pick",
-              );
-            } else {
-              apply({ ...save, phase: "service" }, "day");
-            }
-          }}
-        />
-      )}
-      {screen === "day" && (
-        <DayScreen
-          day={DAYS[dayIndex]}
-          dish={dish}
-          dishes={dayDishes}
-          results={save.results}
-          todayResults={save.results.filter((r) => r.day === DAYS[dayIndex])}
-          onCook={() => {
-            setPickEntry({ mode: "service", initial: [] });
-            setScreen("pick");
-          }}
-          onMarket={() => {
-            setMarketReturn("day");
-            setScreen("market");
-          }}
-        />
-      )}
-      {screen === "pick" && (
-        <PickScreen
-          dish={dish}
-          basket={save.basket ?? []}
-          initialPick={pickInitial}
-          guidance={
-            pickMode === "repair" || pickMode === "retrial"
-              ? trialVerdict
-              : undefined
-          }
-          repair={pickMode === "repair"}
-          onBack={() => {
-            if (pickMode === "service") {
-              setScreen("day");
-            } else if (pickMode === "trial") {
-              apply({ ...save, phase: "prep", trialStep: null }, "prep");
-            } else {
-              apply(
-                { ...save, trialStep: "result", phase: "trial" },
-                "result",
-              );
-            }
-          }}
-          onMarket={(pick) => {
-            setPickEntry({ mode: pickMode, initial: pick });
-            setMarketReturn("pick");
-            setScreen("market");
-          }}
-          onDone={(pick) => {
-            if (pickMode === "service") {
-              apply({ ...save, pick }, "cook");
-            } else if (pickMode === "repair") {
-              apply(
-                { ...save, pick, trialStep: "result", phase: "trial" },
-                "result",
-              );
-            } else {
-              apply(
-                { ...save, pick, trialStep: "cook", phase: "trial" },
-                "cook",
-              );
-            }
-          }}
-        />
-      )}
-      {screen === "cook" &&
-        (dish.verb === "wrap" ? (
-          <WrapCook
-            dish={dish}
+      {/* Keep the active screen mounted so visiting Home preserves drafts. */}
+      <GameContainer
+        style={[styles.gameArea, !gameVisible && styles.hidden]}
+        accessibilityElementsHidden={!gameVisible}
+        importantForAccessibility={gameVisible ? "auto" : "no-hide-descendants"}
+      >
+        {gameVisible && screen !== "market" && <HomeButton onPress={goHome} />}
+        {screen === "market" && (
+          <MarketScreen
+            onHome={goHome}
+            basket={currentBasket}
+            onBasketChange={updateBasket}
+            ctaLabel={marketReturn != null ? "Done →" : undefined}
+            backLabel={marketReturn != null ? "← Back" : undefined}
             onBack={() => {
-              if (trialActive) {
-                setPickEntry({
-                  mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
-                  initial: save.pick ?? [],
-                });
+              if (marketReturn != null) {
+                const to = marketReturn === "pick" ? "pick" : "day";
+                setMarketReturn(null);
+                setScreen(to);
+              } else {
+                goHome();
+              }
+            }}
+            onDone={(basket) => {
+              if (marketReturn != null) {
+                const to = marketReturn === "pick" ? "pick" : "day";
+                setMarketReturn(null);
+                apply({ ...save, basket }, to);
+              } else {
+                apply({ ...save, basket, phase: "prep" }, "prep");
+              }
+            }}
+          />
+        )}
+        {screen === "prep" && (
+          <PrepScreen
+            dishes={pool}
+            basket={save.basket ?? []}
+            trialDish={trialDish}
+            onStart={() => {
+              if (trialDish) {
+                setPickEntry({ mode: "trial", initial: [] });
                 apply(
                   { ...save, trialStep: "pick", phase: "trial" },
                   "pick",
                 );
               } else {
-                setPickEntry({ mode: "service", initial: save.pick ?? [] });
-                setScreen("pick");
-              }
-            }}
-            onServe={(ex) => {
-              if (trialActive) {
-                apply(
-                  {
-                    ...save,
-                    execution: ex,
-                    trialAttempts: (save.trialAttempts ?? 0) + 1,
-                    trialStep: "result",
-                    phase: "trial",
-                  },
-                  "result",
-                );
-              } else {
-                apply({ ...save, execution: ex }, "result");
+                apply({ ...save, phase: "service" }, "day");
               }
             }}
           />
-        ) : (
-          <CookScreen
+        )}
+        {screen === "day" && (
+          <DayScreen
+            day={DAYS[dayIndex]}
             dish={dish}
+            dishes={dayDishes}
+            results={save.results}
+            todayResults={save.results.filter((r) => r.day === DAYS[dayIndex])}
+            onCook={() => {
+              setPickEntry({ mode: "service", initial: [] });
+              setScreen("pick");
+            }}
+            onMarket={() => {
+              openPreparedMarket(undefined, () => {
+                setMarketReturn("day");
+                setScreen("market");
+              });
+            }}
+          />
+        )}
+        {screen === "pick" && (
+          <PickScreen
+            dish={dish}
+            basket={save.basket ?? []}
+            initialPick={pickInitial}
+            guidance={
+              pickMode === "repair" || pickMode === "retrial"
+                ? trialVerdict
+                : undefined
+            }
+            repair={pickMode === "repair"}
             onBack={() => {
-              if (trialActive) {
-                setPickEntry({
-                  mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
-                  initial: save.pick ?? [],
-                });
-                apply(
-                  { ...save, trialStep: "pick", phase: "trial" },
-                  "pick",
-                );
+              if (pickMode === "service") {
+                setScreen("day");
+              } else if (pickMode === "trial") {
+                apply({ ...save, phase: "prep", trialStep: null }, "prep");
               } else {
-                setPickEntry({ mode: "service", initial: save.pick ?? [] });
-                setScreen("pick");
+                apply(
+                  { ...save, trialStep: "result", phase: "trial" },
+                  "result",
+                );
               }
             }}
-            onServe={(ex) => {
-              if (trialActive) {
+            onMarket={(pick) => {
+              openPreparedMarket(undefined, () => {
+                setPickEntry({ mode: pickMode, initial: pick });
+                setMarketReturn("pick");
+                setScreen("market");
+              });
+            }}
+            onDone={(pick) => {
+              if (pickMode === "service") {
+                apply({ ...save, pick }, "cook");
+              } else if (pickMode === "repair") {
                 apply(
-                  {
-                    ...save,
-                    execution: ex,
-                    trialAttempts: (save.trialAttempts ?? 0) + 1,
-                    trialStep: "result",
-                    phase: "trial",
-                  },
+                  { ...save, pick, trialStep: "result", phase: "trial" },
                   "result",
                 );
               } else {
-                apply({ ...save, execution: ex }, "result");
+                apply(
+                  { ...save, pick, trialStep: "cook", phase: "trial" },
+                  "cook",
+                );
               }
             }}
           />
-        ))}
-      {screen === "result" && (
-        <ResultScreen
-          dish={dish}
-          pick={save.pick ?? []}
-          execution={save.execution ?? 1}
-          prevBest={save.bestByDish?.[dish.id]}
-          retryLabel={
-            save.results.length + 1 >= 5 * perDay
-              ? "Friday close →"
-              : (save.results.length + 1) % perDay === 0
-                ? "Next day →"
-                : "Next dish →"
-          }
-          trial={trialActive}
-          trialVerdict={trialVerdict}
-          trialCtaLabel={trialCtaLabel}
-          onTrialCta={handleTrialCta}
-          onRetry={() => {
-            const r = scoreDish(dish, save.pick ?? [], save.execution ?? 1);
-            const bestByDish = {
-              ...save.bestByDish,
-              [dish.id]: Math.max(save.bestByDish?.[dish.id] ?? 0, r.percent),
-            };
-            const result: DayResult = {
-              day: DAYS[dayIndex],
-              percent: r.percent,
-              medal: r.medal,
-              earned: EARNINGS[r.medal],
-            };
-            const results = [...save.results, result];
-            if (results.length >= 5 * perDay) {
-              apply(
-                {
-                  ...save,
-                  results,
-                  bestByDish,
-                  phase: "close",
-                  savings:
-                    save.savings +
-                    results.reduce((a, x) => a + x.earned, 0),
-                },
-                "close",
-              );
-            } else {
-              apply({ ...save, results, bestByDish }, "day");
+        )}
+        {screen === "cook" &&
+          (dish.verb === "wrap" ? (
+            <WrapCook
+              dish={dish}
+              paused={!gameVisible}
+              onBack={() => {
+                if (trialActive) {
+                  setPickEntry({
+                    mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
+                    initial: save.pick ?? [],
+                  });
+                  apply(
+                    { ...save, trialStep: "pick", phase: "trial" },
+                    "pick",
+                  );
+                } else {
+                  setPickEntry({ mode: "service", initial: save.pick ?? [] });
+                  setScreen("pick");
+                }
+              }}
+              onServe={(ex) => {
+                if (trialActive) {
+                  apply(
+                    {
+                      ...save,
+                      execution: ex,
+                      trialAttempts: (save.trialAttempts ?? 0) + 1,
+                      trialStep: "result",
+                      phase: "trial",
+                    },
+                    "result",
+                  );
+                } else {
+                  apply({ ...save, execution: ex }, "result");
+                }
+              }}
+            />
+          ) : (
+            <CookScreen
+              dish={dish}
+              paused={!gameVisible}
+              onBack={() => {
+                if (trialActive) {
+                  setPickEntry({
+                    mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
+                    initial: save.pick ?? [],
+                  });
+                  apply(
+                    { ...save, trialStep: "pick", phase: "trial" },
+                    "pick",
+                  );
+                } else {
+                  setPickEntry({ mode: "service", initial: save.pick ?? [] });
+                  setScreen("pick");
+                }
+              }}
+              onServe={(ex) => {
+                if (trialActive) {
+                  apply(
+                    {
+                      ...save,
+                      execution: ex,
+                      trialAttempts: (save.trialAttempts ?? 0) + 1,
+                      trialStep: "result",
+                      phase: "trial",
+                    },
+                    "result",
+                  );
+                } else {
+                  apply({ ...save, execution: ex }, "result");
+                }
+              }}
+            />
+          ))}
+        {screen === "result" && (
+          <ResultScreen
+            dish={dish}
+            pick={save.pick ?? []}
+            execution={save.execution ?? 1}
+            prevBest={save.bestByDish?.[dish.id]}
+            retryLabel={
+              save.results.length + 1 >= 5 * perDay
+                ? "Friday close →"
+                : (save.results.length + 1) % perDay === 0
+                  ? "Next day →"
+                  : "Next dish →"
             }
-          }}
-          onHome={() => setScreen("day")}
-        />
-      )}
-      {screen === "close" && (
-        <CloseScreen
-          results={save.results}
-          savings={save.savings}
-          nextTrialDish={trialDish}
-          onNext={() => {
-            const next = beginWeek(save.week + 1, save);
-            apply(next, "weekend");
-          }}
-        />
-      )}
-    </SafeAreaView>
+            trial={trialActive}
+            trialVerdict={trialVerdict}
+            trialCtaLabel={trialCtaLabel}
+            onTrialCta={handleTrialCta}
+            onRetry={() => {
+              const r = scoreDish(dish, save.pick ?? [], save.execution ?? 1);
+              const bestByDish = {
+                ...save.bestByDish,
+                [dish.id]: Math.max(save.bestByDish?.[dish.id] ?? 0, r.percent),
+              };
+              const result: DayResult = {
+                day: DAYS[dayIndex],
+                percent: r.percent,
+                medal: r.medal,
+                earned: EARNINGS[r.medal],
+              };
+              const results = [...save.results, result];
+              if (results.length >= 5 * perDay) {
+                apply(
+                  {
+                    ...save,
+                    results,
+                    bestByDish,
+                    phase: "close",
+                    savings:
+                      save.savings +
+                      results.reduce((a, x) => a + x.earned, 0),
+                  },
+                  "close",
+                );
+              } else {
+                apply({ ...save, results, bestByDish }, "day");
+              }
+            }}
+            onHome={goHome}
+          />
+        )}
+        {screen === "close" && (
+          <CloseScreen
+            results={save.results}
+            savings={save.savings}
+            nextTrialDish={trialDish}
+            onNext={() => {
+              const next = beginWeek(save.week + 1, save);
+              apply(next, "weekend");
+            }}
+          />
+        )}
+      </GameContainer>
+      <SceneLoading visible={preparing} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  gameArea: { flex: 1 },
+  hidden: { display: "none" },
   loading: {
     flex: 1,
     backgroundColor: colors.bg,

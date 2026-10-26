@@ -8,7 +8,10 @@
     "ios": {
       "bundleIdentifier": "com.apphibian-llc.threeregions.dev",
       "supportsTablet": true,
-      "appleTeamId": "9965C7BUB7"
+      "appleTeamId": "9965C7BUB7",
+      "infoPlist": {
+        "CFBundleDisplayName": "3R Dev"
+      }
     },
     "android": {
       "package": "com.ngoc.threeregions"

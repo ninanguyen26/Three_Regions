@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import { colors } from "../theme";
 import { VERB_COPY } from "./verbCopy";
@@ -23,10 +24,12 @@ export default function CookScreen({
   dish,
   onServe,
   onBack,
+  paused = false,
 }: {
   dish: Dish;
   onServe: (execution: number) => void;
   onBack: () => void;
+  paused?: boolean;
 }) {
   const [fill, setFill] = useState(0);
   const [holding, setHolding] = useState(false);
@@ -48,6 +51,10 @@ export default function CookScreen({
   };
 
   useEffect(() => {
+    if (paused) {
+      setHolding(false);
+      return;
+    }
     if (!holding) return;
     timer.current = setInterval(() => {
       const next = fillRef.current + 100 / (FILL_MS / 16);
@@ -62,7 +69,7 @@ export default function CookScreen({
     }, 16);
     return stopTimer;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [holding]);
+  }, [holding, paused]);
 
   const reset = () => {
     stopTimer();
@@ -155,17 +162,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    backgroundColor: "rgba(217, 185, 138, 0.35)",
+    backgroundColor: colors.targetBand,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
   },
   fill: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#c98f3d",
+    backgroundColor: colors.gold,
   },
   pct: { color: colors.text, fontSize: 22, fontWeight: "700", minWidth: 64 },
   hold: {
@@ -183,12 +190,12 @@ const styles = StyleSheet.create({
   doneText: { color: colors.text, fontSize: 15, textAlign: "center", lineHeight: 21 },
   cta: {
     marginTop: 18,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 34,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
   again: { color: colors.accent, fontSize: 14, fontWeight: "600", marginTop: 14 },
 });

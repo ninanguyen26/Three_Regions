@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import { REGULARS } from "../data/regulars";
 import { DISH_BY_ID } from "../data/dishes";
 import { isAlbumVisible, patAway, revealState } from "../game/guests";

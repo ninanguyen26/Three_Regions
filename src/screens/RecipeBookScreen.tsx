@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import { DISHES } from "../data/dishes";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: 12,
     borderWidth: 3,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 4,

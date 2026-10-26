@@ -82,6 +82,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
           "mushrooms",
           "sweet-potato",
           "potato",
+          "taro",
           "okra",
           "banana-blossom",
           "bean-sprouts",

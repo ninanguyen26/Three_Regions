@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import { medalFor, scoreDish, WRONG_PICK_PENALTY } from "../game/scorer";
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   verdictBox: {
     marginTop: 18,
     backgroundColor: colors.panel,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
     borderWidth: 1,
     borderRadius: 12,
     padding: 14,
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   stamp: {
     marginTop: 10,
     borderWidth: 3,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
     borderRadius: 8,
     paddingHorizontal: 18,
     paddingVertical: 6,
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   unlockBox: {
     marginTop: 18,
     backgroundColor: colors.panel,
-    borderColor: colors.accent,
+    borderColor: colors.panelEdge,
     borderWidth: 1,
     borderRadius: 12,
     padding: 14,
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.panelEdge,
   },
-  rowMiss: { backgroundColor: "rgba(224, 122, 95, 0.08)" },
+  rowMiss: { backgroundColor: colors.errorTint },
   rowMain: { flex: 1, flexShrink: 1, paddingRight: 10 },
   rowWanted: { color: colors.text, fontSize: 14, fontWeight: "600" },
   rowGot: { color: colors.muted, fontSize: 12, marginTop: 2 },
@@ -257,12 +258,12 @@ const styles = StyleSheet.create({
   simBad: { color: colors.bad },
   cta: {
     marginTop: 26,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
   },
-  ctaText: { color: "#241a0e", fontSize: 16, fontWeight: "700" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
   homeWrap: { alignItems: "center", marginTop: 14 },
   home: { color: colors.accent, fontSize: 14, fontWeight: "600" },
 });

@@ -1,17 +1,33 @@
-import React from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Alert,
+  ImageBackground,
+  Modal,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import Text from "../components/AppText";
 import { FORECAST_PARKED, type ForecastNote } from "../game/forecast";
 import type { Dish } from "../data/types";
+import type { MarketSection } from "../data/markets";
 import { colors, fonts } from "../theme";
+import HomeHubIcon from "../components/HomeHubIcon";
+import MarketTown from "../components/MarketTown";
 
-// The home hub: where each week starts. Forecast (parked), the menu,
-// savings. Then Saturday shopping kicks the week off.
+// The weekend hub keeps the town in view, with the weekly menu a tap away.
 export default function HomeScreen({
   week,
   notes,
   pool,
+  shoppingDishes,
   savings,
   onStart,
+  onMarket,
+  startLabel,
   onRecipeBook,
   onGuests,
   onReset,
@@ -19,139 +35,193 @@ export default function HomeScreen({
   week: number;
   notes: ForecastNote[];
   pool: Dish[];
+  shoppingDishes: Dish[];
   savings: number;
   onStart: () => void;
+  onMarket: (market: MarketSection) => void;
+  startLabel?: string;
   onRecipeBook: () => void;
   onGuests: () => void;
   onReset: () => void;
 }) {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const compact = width < 650;
+  const short = height < 450;
+
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Three Regions</Text>
-      <Text style={styles.sub}>One kitchen. Three regions.</Text>
-
-      {!FORECAST_PARKED && (
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>
-          {week === 1
-            ? "Your first week"
-            : week === 2
-              ? "The owner's forecast"
-              : "This week's forecast"}
-        </Text>
-        {week === 1 ? (
-          <Text style={styles.note}>
-            Your first week. The owners guide you while you learn the
-            kitchen.
-          </Text>
-        ) : (
-          notes.map((n) => (
-            <Text key={n.id} style={styles.note}>
-              {n.text}
-            </Text>
-          ))
-        )}
-        {week === 2 ? (
-          <Text style={styles.hint}>
-            Her note, not yours.
-          </Text>
-        ) : null}
-      </View>
-      )}
-
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>On the menu this week</Text>
-        {pool.length > 0 ? (
-          <View style={styles.dishRow}>
-            {pool.map((d) => (
-              <View key={d.id} style={styles.dishChip}>
-                <Text style={styles.dishChipText}>{d.name}</Text>
-              </View>
-            ))}
+    <ImageBackground
+      source={require("../../assets/runtime/tampa-bay-flat-map-inland-v4.png")}
+      resizeMode="stretch"
+      style={styles.root}
+    >
+      <MarketTown onMarket={onMarket} />
+      <SafeAreaView style={styles.safeArea} pointerEvents="box-none">
+      <View style={[styles.hud, short && styles.hudShort]} pointerEvents="box-none">
+        <View style={[styles.header, compact && styles.headerCompact]} pointerEvents="box-none">
+          <View style={styles.stats}>
+            <View style={styles.stat}>
+              <Text style={styles.statLabel}>SATURDAY</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statLabel}>SAVINGS</Text>
+              <Text style={styles.statValue}>${savings}</Text>
+            </View>
           </View>
-        ) : (
-          <Text style={styles.note}>No dishes approved yet.</Text>
-        )}
-        <Text style={styles.note}>
-          Dishes join the menu by passing the owner's trial.
-        </Text>
-        <Text style={styles.hint}>Savings: ${savings}</Text>
+        </View>
+
+        <View style={styles.mapSpace} pointerEvents="none" />
+
+        <View style={[styles.footer, compact && styles.footerCompact]}>
+          <View style={styles.navGroup}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Recipe book" onPress={onRecipeBook} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
+              <HomeHubIcon name="recipes" />
+              <Text style={styles.navText}>Recipes</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Guests" onPress={onGuests} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
+              <HomeHubIcon name="guests" />
+              <Text style={styles.navText}>Guests</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="On the menu this week" onPress={() => setMenuVisible(true)} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
+              <HomeHubIcon name="menu" />
+              <Text style={styles.navText}>Menu</Text>
+            </Pressable>
+          </View>
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
+              onPress={onStart}
+            >
+              <Text style={styles.ctaText}>
+                {startLabel ?? (pool.length >= 5 ? "Go to the market →" : "Shop with the owners →")}
+              </Text>
+            </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => Alert.alert(
+              "Start over?",
+              "This erases your current save and starts a new game.",
+              [
+                { text: "Cancel", style: "cancel" },
+                { text: "Reset", style: "destructive", onPress: onReset },
+              ],
+            )}
+            style={({ pressed }) => [styles.resetLink, pressed && styles.pressed]}
+          >
+            <Text style={styles.resetText}>Reset save</Text>
+          </Pressable>
+        </View>
       </View>
+      </SafeAreaView>
+      <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)} supportedOrientations={["landscape", "portrait"]}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel="Dismiss menu" onPress={() => setMenuVisible(false)} />
+          <View style={styles.menuPanel} accessibilityViewIsModal>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>On the menu this week</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close menu" onPress={() => setMenuVisible(false)} style={styles.closeButton}>
+                <Text style={styles.closeText}>×</Text>
+              </Pressable>
+            </View>
+            <ScrollView
+              style={styles.menuScroll}
+              contentContainerStyle={styles.menuContent}
+              showsVerticalScrollIndicator
+            >
+              {!FORECAST_PARKED && (
+                <View style={styles.forecast}>
+                  <Text style={styles.cardLabel}>
+                    {week === 1 ? "Your first week" : week === 2 ? "The owner's forecast" : "This week's forecast"}
+                  </Text>
+                  {week === 1 ? (
+                    <Text style={styles.note}>Your first week. The owners guide you while you learn the kitchen.</Text>
+                  ) : notes.map((n) => <Text key={n.id} style={styles.note}>{n.text}</Text>)}
+                  {week === 2 && <Text style={styles.hint}>Her note, not yours.</Text>}
+                </View>
+              )}
+              <View style={styles.clueCard}>
+                <Text style={styles.clueLabel}>This week's menu</Text>
+                {shoppingDishes.map((dish) => (
+                  <View key={dish.id}>
+                    <Text style={styles.clue}>{dish.name}</Text>
+                    <Text style={styles.clueHint}>{dish.clue}</Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
 
-      <Pressable style={styles.cta} onPress={onStart}>
-        <Text style={styles.ctaText}>
-          {pool.length >= 5
-            ? "Saturday: go to the market →"
-            : "Saturday: shop with the owners →"}
-        </Text>
-      </Pressable>
-
-      <Pressable onPress={onRecipeBook} hitSlop={8} style={styles.bookLink}>
-        <Text style={styles.bookText}>Recipe book →</Text>
-      </Pressable>
-
-      <Pressable onPress={onGuests} hitSlop={8} style={styles.guestsLink}>
-        <Text style={styles.guestsText}>Guests →</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={() =>
-          Alert.alert(
-            "Start over?",
-            "This erases your current save and starts a new game.",
-            [
-              { text: "Cancel", style: "cancel" },
-              { text: "Reset", style: "destructive", onPress: onReset },
-            ],
-          )
-        }
-        hitSlop={8}
-        style={styles.resetLink}
-      >
-        <Text style={styles.resetText}>Reset save</Text>
-      </Pressable>
-    </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 20, paddingBottom: 40 },
-  title: { color: colors.text, fontSize: 34, fontFamily: fonts.display, marginTop: 12 },
-  sub: { color: colors.accent, fontSize: 16, fontFamily: fonts.body, marginTop: 6 },
-  card: {
-    marginTop: 16,
+  safeArea: { flex: 1 },
+  mapSpace: { flex: 1 },
+  hud: { flex: 1, padding: 20, gap: 16 },
+  hudShort: { padding: 12, gap: 10 },
+  header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+  headerCompact: { flexWrap: "wrap" },
+  titlePanel: {
+    backgroundColor: colors.panel,
+    borderColor: colors.panelEdge,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  title: { color: colors.text, fontSize: 32, fontFamily: fonts.display },
+  titleShort: { fontSize: 26 },
+  sub: { color: colors.accent, fontSize: 14, fontFamily: fonts.body, marginTop: 2 },
+  stats: { flexDirection: "row", gap: 8 },
+  stat: {
     backgroundColor: colors.panel,
     borderColor: colors.panelEdge,
     borderWidth: 1,
     borderRadius: 14,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minWidth: 100,
   },
-  cardLabel: { color: colors.accent, fontSize: 13, fontFamily: fonts.bodyBold },
-  dishRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
-  dishChip: {
-    backgroundColor: colors.bg,
+  statLabel: { color: colors.accent, fontSize: 11, fontFamily: fonts.bodyBold, letterSpacing: 1 },
+  statValue: { color: colors.text, fontSize: 20, fontFamily: fonts.display, marginTop: 2 },
+  menuPanel: {
+    width: "90%",
+    maxWidth: 520,
+    maxHeight: "85%",
+    flexShrink: 1,
+    backgroundColor: colors.panel,
     borderColor: colors.panelEdge,
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderRadius: 16,
+    padding: 14,
   },
-  dishChipText: { color: colors.text, fontSize: 14, fontFamily: fonts.bodySemi },
-  note: { color: colors.text, fontSize: 16, fontFamily: fonts.body, marginTop: 8, lineHeight: 22 },
-  hint: { color: colors.muted, fontSize: 13, fontFamily: fonts.body, marginTop: 10, lineHeight: 18 },
-  cta: {
-    marginTop: 26,
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-  },
-  ctaText: { color: "#241a0e", fontSize: 16, fontFamily: fonts.bodyBold },
-  bookLink: { alignItems: "center", marginTop: 16, paddingVertical: 6 },
-  bookText: { color: colors.accent, fontSize: 14, fontFamily: fonts.bodySemi },
-  guestsLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
-  guestsText: { color: colors.accent, fontSize: 14, fontFamily: fonts.bodySemi },
-  resetLink: { alignItems: "center", marginTop: 8, paddingVertical: 6 },
-  resetText: { color: colors.muted, fontSize: 14, fontFamily: fonts.bodySemi },
+  modalBackdrop: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(44, 36, 30, 0.65)" },
+  modalHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
+  modalTitle: { flex: 1, color: colors.text, fontSize: 22, fontFamily: fonts.display },
+  closeButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.bg },
+  closeText: { color: colors.text, fontSize: 30, lineHeight: 34 },
+  cardLabel: { color: colors.accent, fontSize: 15, fontFamily: fonts.bodyBold },
+  menuScroll: { flexShrink: 1, marginVertical: 8 },
+  menuContent: { paddingBottom: 4 },
+  forecast: { marginBottom: 12 },
+  clueCard: { backgroundColor: colors.panel, borderColor: colors.panelEdge, borderWidth: 1, borderRadius: 14, padding: 16 },
+  clueLabel: { color: colors.accent, fontSize: 13, fontFamily: fonts.bodyBold },
+  clue: { color: colors.text, fontSize: 16, fontFamily: fonts.body, marginTop: 6, lineHeight: 22 },
+  clueHint: { color: colors.muted, fontSize: 13, fontFamily: fonts.body, marginTop: 8, lineHeight: 18 },
+  note: { color: colors.text, fontSize: 15, fontFamily: fonts.body, marginTop: 4, lineHeight: 20 },
+  hint: { color: colors.muted, fontSize: 13, fontFamily: fonts.body, marginTop: 8, lineHeight: 18 },
+  cta: { marginLeft: "auto", maxWidth: 280, backgroundColor: colors.primary, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 13, minHeight: 48, alignItems: "center", justifyContent: "center" },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontFamily: fonts.bodyBold, textAlign: "center" },
+  footer: { flexDirection: "row", alignItems: "center", gap: 10 },
+  footerCompact: { flexWrap: "wrap" },
+  navGroup: { flexDirection: "row", gap: 4 },
+  navButton: { backgroundColor: colors.panel, borderColor: colors.panelEdge, borderWidth: 1, borderRadius: 14, width: 69, height: 69, padding: 4, flexShrink: 0, overflow: "hidden", alignItems: "center", justifyContent: "center", gap: 1 },
+  navText: { color: colors.text, fontSize: 12, lineHeight: 16, fontFamily: fonts.bodyBold },
+  resetLink: { backgroundColor: colors.panel, borderColor: colors.panelEdge, borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 46, justifyContent: "center" },
+  resetText: { color: colors.muted, fontSize: 13, fontFamily: fonts.bodySemi },
+  pressed: { opacity: 0.75, transform: [{ scale: 0.98 }] },
 });

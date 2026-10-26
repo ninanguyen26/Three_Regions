@@ -39,8 +39,8 @@ export interface SaveState {
   /** FIFO rotation order over approved dish ids. The weekly pool is
    * the first 5. Dishes join it by passing the owner's trial. */
   poolQueue: string[];
-  /** Saturday's basket, plus midweek top-ups. Each dish is picked from
-   * it before cooking; only the pick is judged. */
+  /** Shared market basket, saved after each add/removal and cleared for
+   * a new week. Each dish is picked from it; only the pick is judged. */
   basket: string[] | null;
   /** The latest cook's pick, so a result screen still scores right
    * after a reload, and repair and re-trial picks start from it. */
@@ -67,6 +67,16 @@ export interface SaveState {
 
 const KEY = "three-regions-save-v1";
 
+// Rapid basket changes, phase transitions, and resets must reach storage in order.
+let pendingStorage: Promise<void> = Promise.resolve();
+
+function queueStorage(operation: () => Promise<void>): Promise<void> {
+  pendingStorage = pendingStorage.then(operation).catch(() => {
+    // Storage full/blocked. Keep the in-memory game running and allow later saves.
+  });
+  return pendingStorage;
+}
+
 export function freshSave(): SaveState {
   return {
     week: 1,
@@ -92,6 +102,7 @@ export function freshSave(): SaveState {
 
 export async function loadSave(): Promise<SaveState | null> {
   try {
+    await pendingStorage;
     const raw = await AsyncStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SaveState;
@@ -156,16 +167,13 @@ export async function loadSave(): Promise<SaveState | null> {
 
 export async function storeSave(save: SaveState): Promise<void> {
   try {
-    await AsyncStorage.setItem(KEY, JSON.stringify(save));
+    const raw = JSON.stringify(save);
+    await queueStorage(() => AsyncStorage.setItem(KEY, raw));
   } catch {
-    // Storage full/blocked. The in-memory game continues regardless.
+    // An invalid save snapshot must not interrupt the in-memory game.
   }
 }
 
-export async function clearSave(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(KEY);
-  } catch {
-    // Already gone or storage blocked; the fresh save overwrites anyway.
-  }
+export function clearSave(): Promise<void> {
+  return queueStorage(() => AsyncStorage.removeItem(KEY));
 }

@@ -6,7 +6,8 @@
     "start": "expo start --dev-client",
     "ios": "expo run:ios --device",
     "android": "expo run:android",
-    "test": "jest"
+    "test": "jest",
+    "art:build": "node scripts/build-runtime-art.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/caprasimo": "^0.4.0",
