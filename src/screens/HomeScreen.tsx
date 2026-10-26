@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   ImageBackground,
+  type ImageSourcePropType,
   Modal,
   Pressable,
   SafeAreaView,
@@ -17,6 +18,11 @@ import type { MarketSection } from "../data/markets";
 import { colors, fonts } from "../theme";
 import HomeHubIcon from "../components/HomeHubIcon";
 import MarketTown from "../components/MarketTown";
+import SceneReveal from "../components/SceneReveal";
+import { HOME_ASSETS } from "../rendering/sceneAssets";
+import { imageKey } from "../rendering/prepareImages";
+
+const homeImageKeys = new Set(HOME_ASSETS.map(imageKey));
 
 // The weekend hub keeps the town in view, with the weekly menu a tap away.
 export default function HomeScreen({
@@ -44,18 +50,30 @@ export default function HomeScreen({
   onGuests: () => void;
   onReset: () => void;
 }) {
+  const [ready, setReady] = useState(false);
+  const loaded = useRef(new Set<string>());
+  const onImageReady = useCallback((source: ImageSourcePropType) => {
+    loaded.current.add(imageKey(source));
+    if (Array.from(homeImageKeys).every((key) => loaded.current.has(key))) setReady(true);
+  }, []);
+  useEffect(() => {
+    const timeout = setTimeout(() => setReady(true), 4000);
+    return () => clearTimeout(timeout);
+  }, []);
   const [menuVisible, setMenuVisible] = useState(false);
   const { width, height } = useWindowDimensions();
   const compact = width < 650;
   const short = height < 450;
 
   return (
-    <ImageBackground
+    <SceneReveal ready={ready}><ImageBackground
       source={require("../../assets/runtime/tampa-bay-flat-map-inland-v4.png")}
+      onLoad={() => onImageReady(HOME_ASSETS[0])}
+      onError={() => onImageReady(HOME_ASSETS[0])}
       resizeMode="stretch"
       style={styles.root}
     >
-      <MarketTown onMarket={onMarket} />
+      <MarketTown onMarket={onMarket} onImageReady={onImageReady} />
       <SafeAreaView style={styles.safeArea} pointerEvents="box-none">
       <View style={[styles.hud, short && styles.hudShort]} pointerEvents="box-none">
         <View style={[styles.header, compact && styles.headerCompact]} pointerEvents="box-none">
@@ -75,15 +93,15 @@ export default function HomeScreen({
         <View style={[styles.footer, compact && styles.footerCompact]}>
           <View style={styles.navGroup}>
             <Pressable accessibilityRole="button" accessibilityLabel="Recipe book" onPress={onRecipeBook} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
-              <HomeHubIcon name="recipes" />
+              <HomeHubIcon onReady={onImageReady} name="recipes" />
               <Text style={styles.navText}>Recipes</Text>
             </Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel="Guests" onPress={onGuests} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
-              <HomeHubIcon name="guests" />
+              <HomeHubIcon onReady={onImageReady} name="guests" />
               <Text style={styles.navText}>Guests</Text>
             </Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel="On the menu this week" onPress={() => setMenuVisible(true)} style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}>
-              <HomeHubIcon name="menu" />
+              <HomeHubIcon onReady={onImageReady} name="menu" />
               <Text style={styles.navText}>Menu</Text>
             </Pressable>
           </View>
@@ -153,7 +171,7 @@ export default function HomeScreen({
           </View>
         </View>
       </Modal>
-    </ImageBackground>
+    </ImageBackground></SceneReveal>
   );
 }
 

@@ -1,7 +1,7 @@
 import { MARKET_SECTIONS, type MarketSection } from "../data/markets";
 
-export const MARKET_CONTENT_TOP = 10;
-export const MARKET_ROW_HEIGHT = 76;
+export const MARKET_CONTENT_TOP = 2;
+export const MARKET_ROW_HEIGHT = 148;
 type MarketListContent =
   | { kind: "heading"; key: string; title: string; level: 1 | 2; height: number }
   | { kind: "ingredients"; key: string; ids: string[]; height: number }
@@ -9,8 +9,22 @@ type MarketListContent =
 
 export type MarketListItem = MarketListContent & { offset: number };
 
-export function marketColumns(width: number, height: number): number {
-  return Math.max(2, Math.floor((width - (width > height ? 128 : 32)) / 160));
+export function marketColumns(_width: number, _height: number): number {
+  return 3;
+}
+
+export function marketStallLayout(availableWidth: number, availableHeight: number) {
+  // Current stall assets are 1280 × 720.
+  const height = Math.max(1, Math.min(availableHeight, availableWidth * 720 / 1280));
+  const width = height * 1280 / 720;
+  return { width, height, counterWidth: width * 0.875, counterHeight: height * 0.5 };
+}
+
+export function marketSceneLayout(availableWidth: number, availableHeight: number) {
+  const stallRatio = 1280 / 720;
+  const receiptRatio = 1024 / 1280;
+  const height = Math.max(1, Math.min(availableHeight, (availableWidth - 8) / (stallRatio + receiptRatio)));
+  return { ...marketStallLayout(height * stallRatio, height), receiptWidth: height * receiptRatio };
 }
 
 export function buildMarketList(market: MarketSection | undefined, columns: number): MarketListItem[] {
@@ -32,6 +46,13 @@ export function buildMarketList(market: MarketSection | undefined, columns: numb
     }
   }
   return items;
+}
+
+export function buildMarketTabList(market: MarketSection | undefined, columns: number, subsectionIndex = 0): MarketListItem[] {
+  const subsection = market?.subsections[subsectionIndex] ?? market?.subsections[0];
+  return buildMarketList(market && subsection
+    ? { ...market, subsections: [{ ids: subsection.ids }] }
+    : market, columns);
 }
 
 export function initialMarketItems(items: MarketListItem[], windowHeight: number): number {

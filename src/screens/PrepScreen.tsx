@@ -4,18 +4,19 @@ import Text from "../components/AppText";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import type { Dish } from "../data/types";
 import { colors } from "../theme";
+import type { Quantities } from "../game/inventory";
 
 // Sunday prep. A stub for now: the real prep mechanics (broths, pickles,
 // marinades) plug in here later. Today it frames the week: everything
-// Mon-Fri is picked from Saturday's basket.
+// Mon-Fri uses purchased portions from storage.
 export default function PrepScreen({
   dishes,
-  basket,
+  inventory,
   trialDish,
   onStart,
 }: {
   dishes: Dish[];
-  basket: string[];
+  inventory: Quantities;
   /** The dish the owner trials after prep, if one is still locked. */
   trialDish?: Dish | null;
   onStart: () => void;
@@ -30,13 +31,13 @@ export default function PrepScreen({
         </View>
       ))}
       <Text style={styles.body}>
-        Everything Monday to Friday is picked from Saturday's basket
-        {trialDish ? ", which also holds the trial shopping" : ""}:
+        Ingredients in storage are available for the week
+        {trialDish ? ", including the trial" : ""}:
       </Text>
       <View style={styles.chips}>
-        {basket.map((id) => (
+        {Object.keys(inventory).map((id) => (
           <View key={id} style={styles.chip}>
-            <Text style={styles.chipText}>{INGREDIENT_BY_ID[id]?.name}</Text>
+            <Text style={styles.chipText}>{INGREDIENT_BY_ID[id]?.name} ×{inventory[id]}</Text>
           </View>
         ))}
       </View>

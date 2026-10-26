@@ -5,7 +5,7 @@ import type { Dish } from "../data/types";
 import type { DayResult } from "../game/save";
 import { colors } from "../theme";
 
-// One service day: cook the day's dishes from Saturday's basket, or
+// One service day: cook the day's dishes from stored portions, or
 // top up at the market first.
 export default function DayScreen({
   day,
@@ -30,7 +30,7 @@ export default function DayScreen({
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{day}</Text>
       <Text style={styles.sub}>
-        Cook today's dishes from the basket, or top up at the market.
+        Cook today's dishes from storage, or top up at the market.
       </Text>
 
       {results.length > 0 ? (

@@ -9,8 +9,8 @@ const artwork = {
   menu: require("../../assets/runtime/ui/menu.png"),
 };
 
-export default function HomeHubIcon({ name }: { name: HomeHubIconName }) {
-  return <Image source={artwork[name]} resizeMode="contain" style={styles.icon} accessible={false} />;
+export default function HomeHubIcon({ name, onReady }: { name: HomeHubIconName; onReady?: (source: number) => void }) {
+  return <Image source={artwork[name]} resizeMode="contain" style={styles.icon} onLoad={() => onReady?.(artwork[name])} onError={() => onReady?.(artwork[name])} accessible={false} />;
 }
 
 const styles = StyleSheet.create({

@@ -64,7 +64,7 @@ export const INGREDIENTS: IngredientDef[] = [
   { id: "wheat-flour", name: "Wheat flour", category: "bread" },
   { id: "cornstarch", name: "Cornstarch", category: "bread" },
   // seasonings
-  { id: "fish-sauce", name: "Fish sauce", category: "seasoning" },
+  { id: "fish-sauce", name: "Premium fish sauce", category: "seasoning" },
   { id: "regular-fish-sauce", name: "Fish sauce", category: "seasoning" },
   { id: "soy-sauce", name: "Soy sauce", category: "seasoning" },
   { id: "hoisin-sauce", name: "Hoisin sauce", category: "seasoning" },

@@ -1,7 +1,23 @@
 import { MARKET_SECTIONS } from "../data/markets";
-import { buildMarketList, initialMarketItems, marketColumns, MARKET_CONTENT_TOP } from "./marketLayout";
+import { buildMarketList, initialMarketItems, marketColumns, marketStallLayout, marketSceneLayout, MARKET_CONTENT_TOP } from "./marketLayout";
 
 describe("virtualized market layout", () => {
+  test.each([[643, 315], [820, 330], [1000, 656]])("stall and receipt share a height and fit the %dx%d space", (width, height) => {
+    const layout = marketSceneLayout(width, height);
+    expect(layout.width + layout.receiptWidth + 8).toBeLessThanOrEqual(width + 0.001);
+    expect(layout.height).toBeLessThanOrEqual(height);
+    expect(layout.width / (1280 / 720)).toBeCloseTo(layout.receiptWidth / (1024 / 1280));
+  });
+
+  test.each([[667, 230], [844, 278], [956, 328], [1024, 656]])("stall and counter fit a %dx%d scene without distorting the art", (width, height) => {
+    const layout = marketStallLayout(width, height);
+    expect(layout.width).toBeLessThanOrEqual(width);
+    expect(layout.height).toBeLessThanOrEqual(height);
+    expect(layout.width / layout.height).toBeCloseTo(1280 / 720);
+    const columns = marketColumns(layout.counterWidth, layout.counterHeight);
+    expect(columns).toBe(3);
+  });
+
   test.each(MARKET_SECTIONS)("$title retains every ingredient exactly once and in shelf order", (market) => {
     const items = buildMarketList(market, 4);
     expect(items.flatMap((item) => item.kind === "ingredients" ? item.ids : [])).toEqual(market.subsections.flatMap((sub) => sub.ids));

@@ -4,42 +4,37 @@ import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import { colors } from "../theme";
+import type { Quantities } from "../game/inventory";
 
-// One dish's pick: tap from the purchased basket. Only the pick is
-// judged, so anything left in the basket dings nothing. The pick starts
-// empty for service and first-trial cooks (tedious for now, Ngoc's
-// call); repair and re-trial picks start from the failed pick. The
-// recipe is never shown here, trial or service.
-export default function PickScreen({
-  dish,
-  basket,
-  initialPick,
-  guidance,
-  repair,
-  onDone,
-  onBack,
-  onMarket,
-}: {
+// Choose ingredient identities from stored portions. Quantity never changes scoring.
+// Tutorial guidance can reuse the consumed attempt without paying for another cook.
+type PickProps = {
   dish: Dish;
-  /** The purchased basket: the only ingredients the pick can draw on. */
-  basket: string[];
+  inventory: Quantities;
   initialPick: string[];
-  /** The owner's line, shown for repair and re-trial picks. */
   guidance?: string;
-  /** Week 1 guided repair: the CTA re-scores instead of cooking. */
   repair?: boolean;
   onDone: (pick: string[]) => void;
   onBack: () => void;
-  /** Jump to the market to buy more; the pick is kept on return. */
   onMarket: (pick: string[]) => void;
+};
+
+export default function PickScreen(props: PickProps) {
+  const borrowed = new Set(props.repair ? props.initialPick : []);
+  const [pick, setPick] = useState<string[]>(() => [...new Set(props.initialPick)].filter((id) =>
+    INGREDIENT_BY_ID[id] && ((props.inventory[id] ?? 0) > 0 || borrowed.has(id))));
+  const toggle = (id: string) => {
+    if (!(props.inventory[id] > 0) && !borrowed.has(id)) return;
+    setPick((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  };
+  return <PickScreenView {...props} pick={pick} onToggle={toggle} />;
+}
+
+export function PickScreenView({ dish, inventory, initialPick, guidance, repair, onDone, onBack, onMarket, pick, onToggle }: PickProps & {
+  pick: string[];
+  onToggle: (id: string) => void;
 }) {
-  const [pick, setPick] = useState<string[]>(initialPick);
-
-  const toggle = (id: string) =>
-    setPick((p) =>
-      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
-    );
-
+  const availableIds = [...new Set([...Object.keys(inventory).filter((id) => inventory[id] > 0), ...(repair ? initialPick : [])])];
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <Pressable onPress={onBack} hitSlop={10}>
@@ -47,8 +42,7 @@ export default function PickScreen({
       </Pressable>
       <Text style={styles.title}>Pick for {dish.name}</Text>
       <Text style={styles.sub}>
-        Tap what goes in. Only the pick is judged, so anything you leave
-        in the basket dings nothing.
+        Tap what goes in. {repair ? "This guidance uses no additional portions." : "Cook uses one portion of every selected ingredient. Unselected stock stays in storage."}
       </Text>
       {guidance ? (
         <View style={styles.guideCard}>
@@ -59,13 +53,13 @@ export default function PickScreen({
       <Text style={styles.section}>Your pick · {pick.length}</Text>
       <View style={styles.chips}>
         {pick.length === 0 ? (
-          <Text style={styles.empty}>Nothing yet. Tap the basket.</Text>
+          <Text style={styles.empty}>Nothing yet. Pick from storage.</Text>
         ) : (
           pick.map((id) => (
             <Pressable
               key={id}
               style={styles.pickChip}
-              onPress={() => toggle(id)}
+              onPress={() => onToggle(id)}
             >
               <Text style={styles.pickChipText}>
                 {INGREDIENT_BY_ID[id]?.name} ✕
@@ -75,14 +69,14 @@ export default function PickScreen({
         )}
       </View>
 
-      <Text style={styles.section}>From the basket · {basket.length}</Text>
-      {basket.length === 0 ? (
+      <Text style={styles.section}>{repair ? "For this guidance" : "In storage"} · {availableIds.length} ingredients</Text>
+      {availableIds.length === 0 ? (
         <Text style={styles.empty}>
-          Nothing in the basket. Buy first, then pick.
+          Storage is empty. Buy ingredients first, then pick.
         </Text>
       ) : (
         <View style={styles.chips}>
-          {basket.map((id) => {
+          {availableIds.map((id) => {
             const ing = INGREDIENT_BY_ID[id];
             if (!ing) return null;
             const selected = pick.includes(id);
@@ -90,7 +84,7 @@ export default function PickScreen({
               <Pressable
                 key={id}
                 style={[styles.chip, selected && styles.chipSelected]}
-                onPress={() => toggle(id)}
+                onPress={() => onToggle(id)}
               >
                 <Text
                   style={[
@@ -98,7 +92,7 @@ export default function PickScreen({
                     selected && styles.chipTextSelected,
                   ]}
                 >
-                  {ing.name}
+                  {ing.name} · {inventory[id] ?? 0} in stock{repair && !(inventory[id] > 0) ? " · from this attempt" : ""}
                 </Text>
               </Pressable>
             );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Text from "../components/AppText";
+import HomeIcon from "../components/HomeIcon";
 import { DISHES } from "../data/dishes";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
@@ -151,8 +152,8 @@ export default function RecipeBookScreen({
           </Pressable>
         );
       })}
-      <Pressable onPress={onBack} hitSlop={8} style={styles.bottomLink}>
-        <Text style={styles.link}>← Home</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="Go to home" onPress={onBack} hitSlop={8} style={styles.bottomLink}>
+        <HomeIcon />
       </Pressable>
     </ScrollView>
   );

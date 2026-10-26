@@ -3,9 +3,12 @@ import type { Medal } from "./scorer";
 import type { ForecastNote, ForecastState } from "./forecast";
 import { initialForecastState } from "./forecast";
 import { DISH_BY_ID } from "../data/dishes";
+import { INGREDIENT_BY_ID } from "../data/ingredients";
+import { normalizeQuantities, quantitiesFromIds, type Quantities } from "./inventory";
+import type { CookAttempt } from "./cooking";
 
 // Three Regions: the save. One JSON blob in AsyncStorage: the week loop's
-// whole state (week, phase, basket, pick, results, savings, forecast
+// whole state (week, phase, inventory, cart, paid cook, pick, results, savings, forecast
 // machinery), so closing the app mid-week resumes where you left off.
 
 export type Phase = "weekend" | "market" | "prep" | "trial" | "service" | "close";
@@ -34,14 +37,17 @@ export interface SaveState {
   /** This week's forecast notes (Weeks 1: none, 2: one gentle note). */
   notes: ForecastNote[];
   forecastState: ForecastState;
-  /** This week's menu (dish ids). Saturday's basket serves all of it. */
+  /** This week's menu (dish ids). Purchased stock supplies the menu. */
   menuIds: string[];
   /** FIFO rotation order over approved dish ids. The weekly pool is
    * the first 5. Dishes join it by passing the owner's trial. */
   poolQueue: string[];
-  /** Shared market basket, saved after each add/removal and cleared for
-   * a new week. Each dish is picked from it; only the pick is judged. */
-  basket: string[] | null;
+  /** Purchased portions. Unused stock spoils at the start of a new week. */
+  inventory: Quantities;
+  /** Pending purchases, transferred into inventory only on checkout. */
+  cart: Quantities;
+  /** Paid cooking attempt, preserved across Home, app restarts and result reloads. */
+  activeCook: CookAttempt | null;
   /** The latest cook's pick, so a result screen still scores right
    * after a reload, and repair and re-trial picks start from it. */
   pick: string[] | null;
@@ -67,7 +73,7 @@ export interface SaveState {
 
 const KEY = "three-regions-save-v1";
 
-// Rapid basket changes, phase transitions, and resets must reach storage in order.
+// Quantity updates, cooking transactions, and resets must reach storage in order.
 let pendingStorage: Promise<void> = Promise.resolve();
 
 function queueStorage(operation: () => Promise<void>): Promise<void> {
@@ -89,7 +95,9 @@ export function freshSave(): SaveState {
     menuIds: [],
     // The pool rotation queue starts empty; dishes join it by trial.
     poolQueue: [],
-    basket: null,
+    inventory: {},
+    cart: {},
+    activeCook: null,
     pick: null,
     results: [],
     bestByDish: {},
@@ -147,7 +155,42 @@ export async function loadSave(): Promise<SaveState | null> {
       parsed.trialStep === "repair"
         ? parsed.trialStep
         : null;
-    parsed.pick = Array.isArray(parsed.pick) ? parsed.pick : null;
+    parsed.pick = Array.isArray(parsed.pick) ? [...new Set(parsed.pick.filter((id) => Object.hasOwn(INGREDIENT_BY_ID, id)))] : null;
+    const legacy = parsed as SaveState & { basket?: unknown };
+    const hadInventory = Object.hasOwn(parsed, "inventory");
+    parsed.inventory = hadInventory ? normalizeQuantities(parsed.inventory) : quantitiesFromIds(legacy.basket);
+    parsed.cart = normalizeQuantities(parsed.cart);
+    delete legacy.basket;
+    const cook = parsed.activeCook;
+    if (cook && DISH_BY_ID[cook.dishId] && (cook.kind === "trial" || cook.kind === "service") &&
+      (cook.status === "cooking" || cook.status === "result") && Array.isArray(cook.pick)) {
+      parsed.activeCook = {
+        ...cook,
+        pick: [...new Set(cook.pick.filter((id) => Object.hasOwn(INGREDIENT_BY_ID, id)))],
+        progress: {
+          fill: Number.isFinite(cook.progress?.fill) ? Math.max(0, Math.min(100, cook.progress.fill)) : 0,
+          finished: typeof cook.progress?.finished === "number" && Number.isFinite(cook.progress.finished)
+            ? Math.max(0, Math.min(1, cook.progress.finished)) : null,
+        },
+      };
+      if (parsed.activeCook.status === "cooking") parsed.pick = parsed.activeCook.pick;
+    } else {
+      parsed.activeCook = null;
+      // Old trials already on the cooking screen become one paid, resumable attempt.
+      if (!hadInventory && parsed.phase === "trial" && parsed.trialStep === "cook") {
+        const trial = Object.values(DISH_BY_ID).find((dish) => (best[dish.id] ?? 0) < 80);
+        if (trial) {
+          const pick = parsed.pick ?? [];
+          for (const id of pick) {
+            if ((parsed.inventory[id] ?? 0) > 1) parsed.inventory[id] -= 1;
+            else delete parsed.inventory[id];
+          }
+          parsed.activeCook = { dishId: trial.id, kind: "trial", pick, status: "cooking", progress: { fill: 0, finished: null } };
+        }
+      } else if (parsed.phase === "trial" && parsed.trialStep === "cook") {
+        parsed.trialStep = "pick";
+      }
+    }
     // Stamps are a per-dish mark, not a count: drop the retired counter
     // from old saves instead of carrying it forward.
     delete (parsed as unknown as { totalStamps?: unknown }).totalStamps;

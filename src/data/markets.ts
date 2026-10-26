@@ -64,7 +64,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
     title: "Produce market",
     subsections: [
       {
-        title: "Vegetables and mushrooms",
+        title: "Veggies",
         ids: [
           "yellow-onion",
           "white-onion",
@@ -90,7 +90,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Fresh aromatics",
+        title: "Aromatics",
         ids: [
           "ginger",
           "fresh-ginger",
@@ -118,7 +118,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Fruit and other fresh produce",
+        title: "Fruit & more",
         ids: [
           "pineapple",
           "lime",
@@ -134,7 +134,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
     title: "Grocery",
     subsections: [
       {
-        title: "Refrigerated",
+        title: "Chilled",
         ids: [
           "eggs",
           "liquid-egg",
@@ -148,7 +148,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Rice, bread, flour",
+        title: "Grains & bread",
         ids: [
           "jasmine-rice",
           "long-grain-rice",
@@ -160,7 +160,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Sauces and pantry",
+        title: "Pantry",
         ids: [
           "soy-sauce",
           "peanut-butter",
@@ -179,7 +179,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Spices and baking",
+        title: "Spices & baking",
         ids: [
           "turmeric-powder",
           "curry-powder",
@@ -195,7 +195,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Coffee and snacks",
+        title: "Coffee & snacks",
         ids: [
           "arabica-coffee",
           "instant-coffee",
@@ -212,7 +212,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
     title: "Vietnamese specialty",
     subsections: [
       {
-        title: "Noodles, rice, wrappers",
+        title: "Noodles & rice",
         ids: [
           "flat-rice-noodle",
           "dried-rice-noodle",
@@ -229,7 +229,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Bread and flour",
+        title: "Bread & flour",
         ids: [
           "vietnamese-baguette",
           "rice-flour",
@@ -237,7 +237,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Sauces and condiments",
+        title: "Sauces",
         ids: [
           "fish-sauce",
           "regular-fish-sauce",
@@ -253,7 +253,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Seasonings and preserved ingredients",
+        title: "Seasonings",
         ids: [
           "shrimp-floss",
           "toasted-rice-powder",
@@ -268,7 +268,7 @@ export const MARKET_SECTIONS: MarketSection[] = [
         ],
       },
       {
-        title: "Dessert and coffee supplies",
+        title: "Sweets & coffee",
         ids: [
           "robusta-coffee",
           "mung-bean",

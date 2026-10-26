@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Text from "../components/AppText";
+import HomeIcon from "../components/HomeIcon";
 import type { Dish } from "../data/types";
 import { INGREDIENT_BY_ID } from "../data/ingredients";
 import { medalFor, scoreDish, WRONG_PICK_PENALTY } from "../game/scorer";
@@ -161,8 +162,8 @@ export default function ResultScreen({
         </Text>
       </Pressable>
       {!trial ? (
-        <Pressable onPress={onHome} hitSlop={8} style={styles.homeWrap}>
-          <Text style={styles.home}>Home</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Go to home" onPress={onHome} hitSlop={8} style={styles.homeWrap}>
+          <HomeIcon />
         </Pressable>
       ) : null}
     </ScrollView>
@@ -265,5 +266,4 @@ const styles = StyleSheet.create({
   },
   ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: "700" },
   homeWrap: { alignItems: "center", marginTop: 14 },
-  home: { color: colors.accent, fontSize: 14, fontWeight: "600" },
 });

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { SafeAreaView, StyleSheet, useWindowDimensions, View, type ImageSourcePropType } from "react-native";
+import { Alert, SafeAreaView, StyleSheet, useWindowDimensions, View, type ImageSourcePropType } from "react-native";
 import Text from "./src/components/AppText";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -24,6 +24,8 @@ import {
   type ForecastNote,
 } from "./src/game/forecast";
 import { scoreDish } from "./src/game/scorer";
+import { checkout, type Quantities } from "./src/game/inventory";
+import { startCook, finishCook, repairPick, spoilStock, type CookProgress } from "./src/game/cooking";
 import {
   dayPool,
   dishesPerDay,
@@ -78,8 +80,8 @@ type Screen =
 // AsyncStorage.
 export default function App() {
   const [storedSave, setSave] = useState<SaveState | null>(null);
-  const basketRef = useRef<string[] | null>(null);
-  const save = storedSave ? { ...storedSave, basket: basketRef.current } : null;
+  const cartRef = useRef<Quantities>({});
+  const save = storedSave ? { ...storedSave, cart: cartRef.current } : null;
   const latestSave = useRef<SaveState | null>(null);
   latestSave.current = save;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -99,13 +101,22 @@ export default function App() {
       enter();
     }
   }, []);
-  const updateBasket = useCallback((basket: string[]) => {
+  const updateCart = useCallback((cart: Quantities) => {
     const current = latestSave.current;
     if (!current) return;
-    const next = { ...current, basket };
-    basketRef.current = basket;
+    const next = { ...current, cart };
+    cartRef.current = cart;
     latestSave.current = next;
     // Selection updates remain local to MarketScreen; persistence needs no root render.
+    void storeSave(next);
+  }, []);
+  const onCookProgress = useCallback((progress: CookProgress) => {
+    const current = latestSave.current;
+    if (!current?.activeCook || current.activeCook.status !== "cooking") return;
+    if (current.activeCook.progress.fill === progress.fill && current.activeCook.progress.finished === progress.finished) return;
+    const next = { ...current, activeCook: { ...current.activeCook, progress } };
+    latestSave.current = next;
+    setSave(next);
     void storeSave(next);
   }, []);
   const [screen, setScreen] = useState<Screen>("loading");
@@ -134,7 +145,7 @@ export default function App() {
   });
 
   const beginWeek = (week: number, prev: SaveState | null): SaveState => {
-    const base = prev ?? freshSave();
+    const base = spoilStock(prev ?? freshSave());
     const forecastState = base.forecastState;
     let notes: ForecastNote[] = [];
     if (week === 2) notes = [gentleForecast(forecastState, week, Math.random)];
@@ -150,7 +161,6 @@ export default function App() {
       menuIds: (base.menuIds ?? []).filter(
         (id) => (base.bestByDish?.[id] ?? 0) >= 80,
       ),
-      basket: null,
       pick: null,
       results: [],
       trialAttempts: 0,
@@ -162,14 +172,16 @@ export default function App() {
     (async () => {
       const loaded = await loadSave();
       if (loaded) {
-        basketRef.current = loaded.basket;
+        cartRef.current = loaded.cart;
         setSave(loaded);
         if (loaded.phase === "trial" && loaded.trialStep === "repair") {
           setPickEntry({ mode: "repair", initial: loaded.pick ?? [] });
           setScreen("pick");
+        } else if (loaded.activeCook) {
+          setScreen(loaded.activeCook.status === "cooking" ? "cook" : "result");
         } else if (
           loaded.phase === "trial" &&
-          (loaded.trialStep === "pick" || loaded.trialStep === "market")
+          (loaded.trialStep === "pick" || loaded.trialStep === "market" || loaded.trialStep === null)
         ) {
           // Trial picks resume here: first pick empty, re-trial from the
           // failed pick. A legacy "market" step resumes as a re-trial pick.
@@ -194,7 +206,7 @@ export default function App() {
         }
       } else {
         const fresh = beginWeek(1, null);
-        basketRef.current = fresh.basket;
+        cartRef.current = fresh.cart;
         setSave(fresh);
         await storeSave(fresh);
         setScreen("weekend");
@@ -204,7 +216,7 @@ export default function App() {
   }, []);
 
   const apply = (next: SaveState, to: Screen) => {
-    basketRef.current = next.basket;
+    cartRef.current = next.cart;
     latestSave.current = next;
     setSave(next);
     void storeSave(next);
@@ -283,7 +295,7 @@ export default function App() {
       ? [trialDish]
       : [];
   const trialActive = save.phase === "trial" && trialDish != null;
-  const dish = trialActive
+  const dish = save.activeCook ? DISH_BY_ID[save.activeCook.dishId] : trialActive
     ? (trialDish as (typeof DISHES)[number])
     : (dayDishes[cookInDay] ?? DISH_BY_ID["pho-bo"]);
   // The pick screen's entry, set by every navigation into it (and by
@@ -344,7 +356,7 @@ export default function App() {
             ? "Continue to service →"
             : "Friday close →";
   const handleTrialCta = () => {
-    if (!trialActive || !trialDish || !trialScore) return;
+    if (!trialActive || !trialDish || !trialScore || latestSave.current?.trialStep !== "result") return;
     const bestByDish = {
       ...save.bestByDish,
       [trialDish.id]: Math.max(
@@ -367,6 +379,7 @@ export default function App() {
           bestByDish,
           menuIds,
           poolQueue,
+          activeCook: null,
           trialAttempts: 0,
           trialStep: null,
           phase: toService ? "service" : "close",
@@ -383,6 +396,7 @@ export default function App() {
         {
           ...save,
           bestByDish,
+          activeCook: !graduated ? save.activeCook : null,
           trialStep: !graduated ? "repair" : "pick",
           phase: "trial",
         },
@@ -393,6 +407,7 @@ export default function App() {
         {
           ...save,
           bestByDish,
+          activeCook: null,
           trialAttempts: 0,
           trialStep: null,
           phase: graduated ? "service" : "close",
@@ -402,9 +417,19 @@ export default function App() {
     }
   };
 
-  const currentBasket = save.basket ?? [];
+  const checkoutMarket = (market?: MarketSection): SaveState => {
+    const current = latestSave.current!;
+    const ids = market ? new Set(market.subsections.flatMap((section) => section.ids)) : undefined;
+    return { ...current, ...checkout(current.inventory, current.cart, ids) };
+  };
+  const serveCook = (execution: number) => {
+    const current = latestSave.current;
+    if (!current) return;
+    const next = finishCook(current, execution);
+    if (next !== current) apply(next, "result");
+  };
   const openPreparedMarket = (market: MarketSection | undefined, enter: () => void) => {
-    void prepareNavigation(marketSceneAssets(market, basketRef.current ?? [], windowWidth, windowHeight), enter);
+    void prepareNavigation(marketSceneAssets(market, Object.keys(cartRef.current), windowWidth, windowHeight), enter);
   };
   const hubVisible = (homeVisible || screen === "weekend") && auxScreen === null;
   const gameVisible = !homeVisible && screen !== "weekend" && auxScreen === null;
@@ -427,7 +452,7 @@ export default function App() {
             if (screen === "weekend") {
               openPreparedMarket(undefined, () => {
                 setHomeVisible(false);
-                apply({ ...save, basket: basketRef.current, phase: "market" }, "market");
+                apply({ ...save, cart: cartRef.current, phase: "market" }, "market");
               });
             } else {
               setHomeVisible(false);
@@ -465,12 +490,13 @@ export default function App() {
             <MarketScreen
               onHome={goHome}
               market={selectedMarket}
-              basket={currentBasket}
-              onBasketChange={updateBasket}
+              inventory={save.inventory}
+              cart={save.cart}
+              onCartChange={updateCart}
               ctaLabel="Done →"
               onBack={goHome}
-              onDone={(basket) => {
-                apply({ ...save, basket }, screen);
+              onDone={() => {
+                apply(checkoutMarket(selectedMarket), screen);
                 goHome();
               }}
             />
@@ -487,8 +513,9 @@ export default function App() {
         {screen === "market" && (
           <MarketScreen
             onHome={goHome}
-            basket={currentBasket}
-            onBasketChange={updateBasket}
+            inventory={save.inventory}
+            cart={save.cart}
+            onCartChange={updateCart}
             ctaLabel={marketReturn != null ? "Done →" : undefined}
             backLabel={marketReturn != null ? "← Back" : undefined}
             onBack={() => {
@@ -500,13 +527,14 @@ export default function App() {
                 goHome();
               }
             }}
-            onDone={(basket) => {
+            onDone={() => {
+              const purchased = checkoutMarket();
               if (marketReturn != null) {
                 const to = marketReturn === "pick" ? "pick" : "day";
                 setMarketReturn(null);
-                apply({ ...save, basket }, to);
+                apply(purchased, to);
               } else {
-                apply({ ...save, basket, phase: "prep" }, "prep");
+                apply({ ...purchased, phase: "prep" }, "prep");
               }
             }}
           />
@@ -514,7 +542,7 @@ export default function App() {
         {screen === "prep" && (
           <PrepScreen
             dishes={pool}
-            basket={save.basket ?? []}
+            inventory={save.inventory}
             trialDish={trialDish}
             onStart={() => {
               if (trialDish) {
@@ -551,7 +579,7 @@ export default function App() {
         {screen === "pick" && (
           <PickScreen
             dish={dish}
-            basket={save.basket ?? []}
+            inventory={save.inventory}
             initialPick={pickInitial}
             guidance={
               pickMode === "repair" || pickMode === "retrial"
@@ -579,19 +607,17 @@ export default function App() {
               });
             }}
             onDone={(pick) => {
-              if (pickMode === "service") {
-                apply({ ...save, pick }, "cook");
-              } else if (pickMode === "repair") {
-                apply(
-                  { ...save, pick, trialStep: "result", phase: "trial" },
-                  "result",
-                );
-              } else {
-                apply(
-                  { ...save, pick, trialStep: "cook", phase: "trial" },
-                  "cook",
-                );
+              const current = latestSave.current!;
+              if (pickMode === "repair") {
+                apply(repairPick(current, pick), "result");
+                return;
               }
+              const started = startCook(current, dish.id, pick, pickMode === "service" ? "service" : "trial");
+              if (!started.ok) {
+                Alert.alert("Not enough stock", `Buy more before cooking: ${started.missing.map((id) => INGREDIENT_BY_ID[id]?.name ?? id).join(", ")}.`);
+                return;
+              }
+              apply(started.save, started.save.activeCook?.status === "result" ? "result" : "cook");
             }}
           />
         )}
@@ -600,73 +626,17 @@ export default function App() {
             <WrapCook
               dish={dish}
               paused={!gameVisible}
-              onBack={() => {
-                if (trialActive) {
-                  setPickEntry({
-                    mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
-                    initial: save.pick ?? [],
-                  });
-                  apply(
-                    { ...save, trialStep: "pick", phase: "trial" },
-                    "pick",
-                  );
-                } else {
-                  setPickEntry({ mode: "service", initial: save.pick ?? [] });
-                  setScreen("pick");
-                }
-              }}
-              onServe={(ex) => {
-                if (trialActive) {
-                  apply(
-                    {
-                      ...save,
-                      execution: ex,
-                      trialAttempts: (save.trialAttempts ?? 0) + 1,
-                      trialStep: "result",
-                      phase: "trial",
-                    },
-                    "result",
-                  );
-                } else {
-                  apply({ ...save, execution: ex }, "result");
-                }
-              }}
+              initialProgress={save.activeCook?.progress}
+              onProgress={onCookProgress}
+              onServe={serveCook}
             />
           ) : (
             <CookScreen
               dish={dish}
               paused={!gameVisible}
-              onBack={() => {
-                if (trialActive) {
-                  setPickEntry({
-                    mode: (save.trialAttempts ?? 0) > 0 ? "retrial" : "trial",
-                    initial: save.pick ?? [],
-                  });
-                  apply(
-                    { ...save, trialStep: "pick", phase: "trial" },
-                    "pick",
-                  );
-                } else {
-                  setPickEntry({ mode: "service", initial: save.pick ?? [] });
-                  setScreen("pick");
-                }
-              }}
-              onServe={(ex) => {
-                if (trialActive) {
-                  apply(
-                    {
-                      ...save,
-                      execution: ex,
-                      trialAttempts: (save.trialAttempts ?? 0) + 1,
-                      trialStep: "result",
-                      phase: "trial",
-                    },
-                    "result",
-                  );
-                } else {
-                  apply({ ...save, execution: ex }, "result");
-                }
-              }}
+              initialProgress={save.activeCook?.progress}
+              onProgress={onCookProgress}
+              onServe={serveCook}
             />
           ))}
         {screen === "result" && (
@@ -687,6 +657,7 @@ export default function App() {
             trialCtaLabel={trialCtaLabel}
             onTrialCta={handleTrialCta}
             onRetry={() => {
+              if (latestSave.current?.activeCook?.status !== "result") return;
               const r = scoreDish(dish, save.pick ?? [], save.execution ?? 1);
               const bestByDish = {
                 ...save.bestByDish,
@@ -704,6 +675,7 @@ export default function App() {
                   {
                     ...save,
                     results,
+                    activeCook: null,
                     bestByDish,
                     phase: "close",
                     savings:
@@ -713,7 +685,7 @@ export default function App() {
                   "close",
                 );
               } else {
-                apply({ ...save, results, bestByDish }, "day");
+                apply({ ...save, results, bestByDish, activeCook: null }, "day");
               }
             }}
             onHome={goHome}

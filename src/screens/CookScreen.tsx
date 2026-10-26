@@ -4,6 +4,7 @@ import Text from "../components/AppText";
 import type { Dish } from "../data/types";
 import { colors } from "../theme";
 import { VERB_COPY } from "./verbCopy";
+import type { CookProgress } from "../game/cooking";
 
 // The placeholder cooking step: hold to fill; release inside the band for
 // a clean execution. Where you stop becomes the scorer's execution input
@@ -23,19 +24,30 @@ function executionFor(fill: number): number {
 export default function CookScreen({
   dish,
   onServe,
-  onBack,
+  initialProgress,
+  onProgress,
   paused = false,
 }: {
   dish: Dish;
   onServe: (execution: number) => void;
-  onBack: () => void;
+  initialProgress?: CookProgress;
+  onProgress?: (progress: CookProgress) => void;
   paused?: boolean;
 }) {
-  const [fill, setFill] = useState(0);
+  const [fill, setFill] = useState(initialProgress?.fill ?? 0);
   const [holding, setHolding] = useState(false);
-  const [finished, setFinished] = useState<number | null>(null);
+  const [finished, setFinished] = useState<number | null>(initialProgress?.finished ?? null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fillRef = useRef(0);
+  const fillRef = useRef(initialProgress?.fill ?? 0);
+  const lastCheckpoint = useRef(0);
+
+  useEffect(() => {
+    const now = Date.now();
+    if (paused || finished !== null || fill === 0 || now - lastCheckpoint.current >= 250) {
+      lastCheckpoint.current = now;
+      onProgress?.({ fill, finished });
+    }
+  }, [fill, finished, paused, onProgress]);
 
   const stopTimer = () => {
     if (timer.current) {
@@ -85,9 +97,6 @@ export default function CookScreen({
 
   return (
     <View style={styles.root}>
-      <Pressable onPress={onBack} hitSlop={10} style={styles.backWrap}>
-        <Text style={styles.back}>← Back</Text>
-      </Pressable>
       <Text style={styles.title}>{copy.title}</Text>
       <Text style={styles.sub}>
         {dish.name} · {holdLower}, let go inside the golden band
@@ -137,8 +146,6 @@ export default function CookScreen({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg, padding: 20 },
-  backWrap: { alignSelf: "flex-start" },
-  back: { color: colors.accent, fontSize: 15, fontWeight: "600" },
   title: { color: colors.text, fontSize: 28, fontWeight: "700", marginTop: 10 },
   sub: { color: colors.muted, fontSize: 14, marginTop: 6 },
   gaugeWrap: {

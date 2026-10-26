@@ -35,6 +35,9 @@
     "typescript": "~6.0.3"
   },
   "jest": {
+    "moduleNameMapper": {
+      "\\.svg$": "<rootDir>/src/__mocks__/svg.js"
+    },
     "testMatch": [
       "<rootDir>/src/**/*.test.ts"
     ]

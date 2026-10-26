@@ -63,6 +63,7 @@ export const INGREDIENT_ART: Partial<Record<string, ImageSourcePropType>> = {
   "regular-fish-sauce": require("../../assets/runtime/ingredients/sauces-condiments/regular-fish-sauce.png"),
   "soy-sauce": require("../../assets/runtime/ingredients/pantry/soy-sauce.png"),
   "hoisin-sauce": require("../../assets/runtime/ingredients/sauces-condiments/hoisin-sauce.png"),
+  "peanut-sesame-sauce": require("../../assets/runtime/ingredients/sauces-condiments/peanut-sesame-sauce.png"),
   "peanut-butter": require("../../assets/runtime/ingredients/pantry/peanut-butter.png"),
   "roasted-peanuts": require("../../assets/runtime/ingredients/pantry/roasted-peanuts.png"),
   "maggi-seasoning": require("../../assets/runtime/ingredients/sauces-condiments/maggi-seasoning.png"),

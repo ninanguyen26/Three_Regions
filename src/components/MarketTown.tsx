@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from "react-native";
 import { MARKET_SECTIONS, type MarketSection } from "../data/markets";
 import { colors } from "../theme";
 import { MARKET_ART } from "../data/marketArt";
@@ -29,7 +29,7 @@ const markets = [
   },
 ];
 
-export default function MarketTown({ onMarket }: { onMarket: (market: MarketSection) => void }) {
+export default function MarketTown({ onMarket, onImageReady }: { onMarket: (market: MarketSection) => void; onImageReady?: (source: ImageSourcePropType) => void }) {
   const [area, setArea] = useState({ width: 0, height: 0 });
   const baseSize = Math.min(156, area.width * 0.14, area.height * 0.25);
   const restaurantSize = baseSize * 1.1;
@@ -60,17 +60,19 @@ export default function MarketTown({ onMarket }: { onMarket: (market: MarketSect
                   top: area.height * market.y - size * 0.86,
                 }, pressed && styles.pressed]}
               >
-                <Image source={MARKET_ART[title].building} resizeMode="contain" style={styles.art} accessible={false} />
+                <Image onLoad={() => onImageReady?.(MARKET_ART[title].building)} onError={() => onImageReady?.(MARKET_ART[title].building)} source={MARKET_ART[title].building} resizeMode="contain" style={styles.art} accessible={false} />
                 <View pointerEvents="none" style={[styles.badge, {
                   width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2,
                   top: size * 0.08, left: (size - badgeSize) / 2,
                 }]}>
-                  <Image source={MARKET_ART[title].icon} resizeMode="contain" style={styles.icon} accessible={false} />
+                  <Image onLoad={() => onImageReady?.(MARKET_ART[title].icon)} onError={() => onImageReady?.(MARKET_ART[title].icon)} source={MARKET_ART[title].icon} resizeMode="contain" style={styles.icon} accessible={false} />
                 </View>
               </Pressable>
             );
           })}
           <Image
+            onLoad={() => onImageReady?.(require("../../assets/runtime/restaurant-building.png"))}
+            onError={() => onImageReady?.(require("../../assets/runtime/restaurant-building.png"))}
             source={require("../../assets/runtime/restaurant-building.png")}
             resizeMode="contain"
             accessibilityLabel="Three Regions restaurant"
