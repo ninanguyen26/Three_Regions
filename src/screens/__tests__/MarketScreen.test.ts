@@ -76,8 +76,8 @@ describe("individual market visits", () => {
     expect(onSubsectionChange).toHaveBeenCalledWith(1);
 
     const breadView = renderMarket({ market, activeSubsection: 1, cart: { "flat-rice-noodle": 2 } });
-    expect(findIngredientButton(breadView, "Vietnamese baguette")).toBeDefined();
-    expect(findIngredientButton(breadView, "Fresh flat rice noodles")).toBeUndefined();
+    expect(findIngredientButton(breadView, "Increase Vietnamese baguette on counter")).toBeDefined();
+    expect(findIngredientButton(breadView, "Increase Fresh flat rice noodles on counter")).toBeUndefined();
     expect(findIngredientButton(breadView, "Decrease Fresh flat rice noodles")).toBeDefined();
   });
 
@@ -93,16 +93,17 @@ describe("individual market visits", () => {
     const onCartChange = jest.fn();
     const view = renderMarket({ market: meatMarket, cart: { shrimp: 2 }, onCartChange });
     expect(textOf(view)).not.toContain("Shrimp");
-    const addBeef = findIngredientButton(view, "Beef brisket");
+    const addBeef = findIngredientButton(view, "Increase Beef brisket on counter");
     expect(addBeef).toBeDefined();
     addBeef!();
     expect(onCartChange).toHaveBeenCalledWith({ shrimp: 2, "beef-brisket": 1 });
   });
 
-  test("tapping an ingredient again adds a portion and retains other pending purchases", () => {
+  test("only the quantity buttons add portions, while the card itself is not pressable", () => {
     const onCartChange = jest.fn();
     const view = renderMarket({ market: meatMarket, cart: { shrimp: 2, "beef-brisket": 1 }, onCartChange });
-    findIngredientButton(view, "Beef brisket")!();
+    expect(findIngredientButton(view, "Beef brisket")).toBeUndefined();
+    findIngredientButton(view, "Increase Beef brisket on counter")!();
     expect(onCartChange).toHaveBeenCalledWith({ shrimp: 2, "beef-brisket": 2 });
   });
 

@@ -47,23 +47,21 @@ export function IngredientCardView({ id, selected, stock, quantity, onQuantityCh
   return (
     <View style={[styles.card, selected && styles.cardSelected]}>
       <Text style={styles.stockBadge}>{stock} in stock</Text>
-      <Pressable accessibilityRole="button" accessibilityLabel={ingredient.name}
-        accessibilityHint="Add one portion to receipt" accessibilityValue={{ text: `${stock} in stock, ${quantity} on receipt` }}
-        onPress={() => onQuantityChange(id, 1)} style={({ pressed }) => [styles.counterAdd, pressed && styles.pressed]}>
+      <View style={styles.counterContent}>
         <View style={styles.ingredientArt}>
           {art ? <Image source={art} resizeMode="contain" style={styles.ingredientImage} onLoad={imageReady} onError={imageReady} accessible={false} /> : <Text style={styles.initial}>{ingredient.name[0]}</Text>}
         </View>
         <Text style={styles.ingredientName}>{ingredient.name}</Text>
-      </Pressable>
+      </View>
       <View style={styles.counterQuantityControls}>
         <Pressable accessibilityRole="button" accessibilityLabel={`Decrease ${ingredient.name} on counter`}
           accessibilityState={{ disabled: quantity === 0 }} disabled={quantity === 0}
-          onPress={() => onQuantityChange(id, -1)} style={[styles.quantityButton, quantity === 0 && styles.quantityDisabled]}>
+          onPress={() => onQuantityChange(id, -1)} style={[styles.quantityButton, styles.counterQuantityButton, quantity === 0 && styles.quantityDisabled]}>
           <Text style={styles.quantitySign}>−</Text>
         </Pressable>
         <Text style={styles.quantityNumber} accessibilityLabel={`${quantity} portions on receipt`}>{quantity}</Text>
         <Pressable accessibilityRole="button" accessibilityLabel={`Increase ${ingredient.name} on counter`}
-          onPress={() => onQuantityChange(id, 1)} style={styles.quantityButton}>
+          onPress={() => onQuantityChange(id, 1)} style={[styles.quantityButton, styles.counterQuantityButton]}>
           <Text style={styles.quantitySign}>+</Text>
         </Pressable>
       </View>
@@ -315,8 +313,9 @@ const styles = StyleSheet.create({
   grid: { flexDirection: "row", gap: 4 },
   spacer: { flex: 1 },
   card: { flex: 1, backgroundColor: colors.onSecondary, height: 140, paddingTop: 16, paddingHorizontal: 5, alignItems: "center", justifyContent: "center", borderRadius: 8, borderWidth: 2, borderColor: "transparent" },
-  counterAdd: { alignItems: "center", alignSelf: "stretch" },
-  counterQuantityControls: { flexDirection: "row", alignItems: "center", marginTop: 1 },
+  counterContent: { alignItems: "center", alignSelf: "stretch" },
+  counterQuantityControls: { flexDirection: "row", alignItems: "center", marginTop: 0 },
+  counterQuantityButton: { minHeight: 22 },
   quantityDisabled: { opacity: 0.35 },
   cardSelected: { borderColor: colors.accent },
   ingredientArt: { width: 64, height: 64, alignItems: "center", justifyContent: "center" },
